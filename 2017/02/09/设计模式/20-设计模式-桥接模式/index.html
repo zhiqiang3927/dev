@@ -20,18 +20,24 @@
     var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="每天成长一点点">
+  <meta name="description" content="在现实生活中，某些类具有两个或多个维度的变化，如图形既可按形状分，又可按颜色分。如何设计类似于 PhotoShop 这样的软件，能画不同形状和不同颜色的图形呢？如果用继承方式，m 种形状和 n 种颜色的图形就有 m×n 种，不但对应的子类很多，而且扩展困难。 当然，这样的例子还有很多，如不同颜色和字体的文字、不同品牌和功率的汽车、不同性别和职业的男女、支持不同平台和不同文件格式的媒体播放器等。如果">
 <meta property="og:type" content="article">
 <meta property="og:title" content="20-设计模式-桥接模式">
 <meta property="og:url" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="3927学习吧">
-<meta property="og:description" content="每天成长一点点">
+<meta property="og:description" content="在现实生活中，某些类具有两个或多个维度的变化，如图形既可按形状分，又可按颜色分。如何设计类似于 PhotoShop 这样的软件，能画不同形状和不同颜色的图形呢？如果用继承方式，m 种形状和 n 种颜色的图形就有 m×n 种，不但对应的子类很多，而且扩展困难。 当然，这样的例子还有很多，如不同颜色和字体的文字、不同品牌和功率的汽车、不同性别和职业的男女、支持不同平台和不同文件格式的媒体播放器等。如果">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/1.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/2.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/3.jpg">
+<meta property="og:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/4.jpg">
+<meta property="og:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/5.gif">
 <meta property="article:published_time" content="2017-02-08T16:48:34.000Z">
-<meta property="article:modified_time" content="2020-02-28T17:07:39.696Z">
+<meta property="article:modified_time" content="2020-02-29T05:14:35.559Z">
 <meta property="article:author" content="Jackzhou">
-<meta property="article:tag" content="技术，笔记">
+<meta property="article:tag" content="桥接模式">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/1.gif">
 
 <link rel="canonical" href="http://3927.group/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/">
 
@@ -126,7 +132,7 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">15</span></a>
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">47</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -136,7 +142,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">41</span></a>
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">37</span></a>
 
   </li>
   </ul>
@@ -212,7 +218,60 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <p>在现实生活中，某些类具有两个或多个维度的变化，如图形既可按形状分，又可按颜色分。如何设计类似于 PhotoShop 这样的软件，能画不同形状和不同颜色的图形呢？如果用继承方式，m 种形状和 n 种颜色的图形就有 m×n 种，不但对应的子类很多，而且扩展困难。</p>
+<p>当然，这样的例子还有很多，如不同颜色和字体的文字、不同品牌和功率的汽车、不同性别和职业的男女、支持不同平台和不同文件格式的媒体播放器等。如果用桥接模式就能很好地解决这些问题。</p>
+<h2 id="桥接模式的定义与特点"><a href="#桥接模式的定义与特点" class="headerlink" title="桥接模式的定义与特点"></a>桥接模式的定义与特点</h2><p>桥接（Bridge）模式的定义如下：将抽象与实现分离，使它们可以独立变化。它是用组合关系代替继承关系来实现，从而降低了抽象和实现这两个可变维度的耦合度。</p>
+<p>桥接（Bridge）模式的优点是：</p>
+<ul>
+<li>由于抽象与实现分离，所以扩展能力强；</li>
+<li>其实现细节对客户透明。</li>
+</ul>
+<p>缺点是：由于聚合关系建立在抽象层，要求开发者针对抽象化进行设计与编程，这增加了系统的理解与设计难度。</p>
+<h2 id="桥接模式的结构与实现"><a href="#桥接模式的结构与实现" class="headerlink" title="桥接模式的结构与实现"></a>桥接模式的结构与实现</h2><p>可以将抽象化部分与实现化部分分开，取消二者的继承关系，改用组合关系。</p>
+<h3 id="模式的结构"><a href="#模式的结构" class="headerlink" title="模式的结构"></a>模式的结构</h3><p>桥接（Bridge）模式包含以下主要角色。</p>
+<ul>
+<li>抽象化（Abstraction）角色：定义抽象类，并包含一个对实现化对象的引用。</li>
+<li>扩展抽象化（Refined    Abstraction）角色：是抽象化角色的子类，实现父类中的业务方法，并通过组合关系调用实现化角色中的业务方法。</li>
+<li>实现化（Implementor）角色：定义实现化角色的接口，供扩展抽象化角色调用。</li>
+<li>具体实现化（Concrete Implementor）角色：给出实现化角色接口的具体实现。</li>
+</ul>
+<p>其结构图如图 1 所示。</p>
+<img src="/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/1.gif" class="" title="图1 桥接模式的结构图">图1 桥接模式的结构图
+
+<h3 id="模式的实现"><a href="#模式的实现" class="headerlink" title="模式的实现"></a>模式的实现</h3><p>桥接模式的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> bridge;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BridgeTest</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Implementor imple=<span class="keyword">new</span> ConcreteImplementorA();</span><br><span class="line">        Abstraction abs=<span class="keyword">new</span> RefinedAbstraction(imple);</span><br><span class="line">        abs.Operation();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//实现化角色</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Implementor</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">OperationImpl</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体实现化角色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConcreteImplementorA</span> <span class="keyword">implements</span> <span class="title">Implementor</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">OperationImpl</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"具体实现化(Concrete Implementor)角色被访问"</span> );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象化角色</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Abstraction</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">   <span class="keyword">protected</span> Implementor imple;</span><br><span class="line">   <span class="function"><span class="keyword">protected</span> <span class="title">Abstraction</span><span class="params">(Implementor imple)</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       <span class="keyword">this</span>.imple=imple;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">Operation</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//扩展抽象化角色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RefinedAbstraction</span> <span class="keyword">extends</span> <span class="title">Abstraction</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">protected</span> <span class="title">RefinedAbstraction</span><span class="params">(Implementor imple)</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>(imple);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Operation</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"扩展抽象化(Refined Abstraction)角色被访问"</span> );</span><br><span class="line">       imple.OperationImpl();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序的运行结果如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">扩展抽象化(Refined Abstraction)角色被访问</span><br><span class="line">具体实现化(Concrete Implementor)角色被访问</span><br></pre></td></tr></table></figure>
+
+<h2 id="桥接模式的应用实例"><a href="#桥接模式的应用实例" class="headerlink" title="桥接模式的应用实例"></a>桥接模式的应用实例</h2><p>【例1】用桥接（Bridge）模式模拟女士皮包的选购。</p>
+<p>分析：女士皮包有很多种，可以按用途分、按皮质分、按品牌分、按颜色分、按大小分等，存在多个维度的变化，所以采用桥接模式来实现女士皮包的选购比较合适。</p>
+<p>本实例按用途分可选钱包（Wallet）和挎包（HandBag），按颜色分可选黄色（Yellow）和红色（Red）。可以按两个维度定义为颜色类和包类。（点此下载本实例所要显示的包的图片）。</p>
+<p>颜色类（Color）是一个维度，定义为实现化角色，它有两个具体实现化角色：黄色和红色，通过 getColor() 方法可以选择颜色；包类（Bag）是另一个维度，定义为抽象化角色，它有两个扩展抽象化角色：挎包和钱包，它包含了颜色类对象，通过 getName() 方法可以选择相关颜色的挎包和钱包。</p>
+<p>客户类通过 ReadXML 类从 XML 配置文件中获取包信息（点此下载 XML 配置文件），并把选到的产品通过窗体显示出现，图 2 所示是其结构图。</p>
+<img src="/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/2.gif" class="" title="图2 女士皮包选购的结构图">图2 女士皮包选购的结构图
+<p>程序代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> bridge;</span><br><span class="line"><span class="keyword">import</span> java.awt.*;</span><br><span class="line"><span class="keyword">import</span> javax.swing.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BagManage</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Color color;</span><br><span class="line">        Bag bag;</span><br><span class="line">        color=(Color)ReadXML.getObject(<span class="string">"color"</span>);</span><br><span class="line">        bag=(Bag)ReadXML.getObject(<span class="string">"bag"</span>);</span><br><span class="line">        bag.setColor(color);</span><br><span class="line">        String name=bag.getName();</span><br><span class="line">        show(name);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">(String name)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        JFrame jf=<span class="keyword">new</span> JFrame(<span class="string">"桥接模式测试"</span>);</span><br><span class="line">        Container contentPane=jf.getContentPane();</span><br><span class="line">        JPanel p=<span class="keyword">new</span> JPanel();</span><br><span class="line">        JLabel l=<span class="keyword">new</span> JLabel(<span class="keyword">new</span> ImageIcon(<span class="string">"src/bridge/"</span>+name+<span class="string">".jpg"</span>));</span><br><span class="line">        p.setLayout(<span class="keyword">new</span> GridLayout(<span class="number">1</span>,<span class="number">1</span>));</span><br><span class="line">        p.setBorder(BorderFactory.createTitledBorder(<span class="string">"女士皮包"</span>));</span><br><span class="line">        p.add(l);</span><br><span class="line">        contentPane.add(p, BorderLayout.CENTER);</span><br><span class="line">        jf.pack();  </span><br><span class="line">        jf.setVisible(<span class="keyword">true</span>);</span><br><span class="line">        jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//实现化角色：颜色</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Color</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">getColor</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体实现化角色：黄色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Yellow</span> <span class="keyword">implements</span> <span class="title">Color</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getColor</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"yellow"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体实现化角色：红色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Red</span> <span class="keyword">implements</span> <span class="title">Color</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getColor</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"red"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象化角色：包</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bag</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> Color color;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setColor</span><span class="params">(Color color)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.color=color;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> String <span class="title">getName</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//扩展抽象化角色：挎包</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HandBag</span> <span class="keyword">extends</span> <span class="title">Bag</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> color.getColor()+<span class="string">"HandBag"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//扩展抽象化角色：钱包</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Wallet</span> <span class="keyword">extends</span> <span class="title">Bag</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> color.getColor()+<span class="string">"Wallet"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> bridge;</span><br><span class="line"><span class="keyword">import</span> javax.xml.parsers.*;</span><br><span class="line"><span class="keyword">import</span> org.w3c.dom.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReadXML</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getObject</span><span class="params">(String args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            DocumentBuilderFactory dFactory=DocumentBuilderFactory.newInstance();</span><br><span class="line">            DocumentBuilder builder=dFactory.newDocumentBuilder();</span><br><span class="line">            Document doc;</span><br><span class="line">            doc=builder.parse(<span class="keyword">new</span> File(<span class="string">"src/bridge/config.xml"</span>));</span><br><span class="line">            NodeList nl=doc.getElementsByTagName(<span class="string">"className"</span>);</span><br><span class="line">            Node classNode=<span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span>(args.equals(<span class="string">"color"</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                classNode=nl.item(<span class="number">0</span>).getFirstChild();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(args.equals(<span class="string">"bag"</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                classNode=nl.item(<span class="number">1</span>).getFirstChild();</span><br><span class="line">            &#125;</span><br><span class="line">            String cName=<span class="string">"bridge."</span>+classNode.getNodeValue();</span><br><span class="line">            Class&lt;?&gt; c=Class.forName(cName);</span><br><span class="line">              Object obj=c.newInstance();</span><br><span class="line">            <span class="keyword">return</span> obj;</span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">catch</span>(Exception e)</span><br><span class="line">        &#123;</span><br><span class="line">               e.printStackTrace();</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序的运行结果如图 3 所示</p>
+<img src="/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/3.jpg" class="" title="图3 女士皮包选购的运行结果1">图3 女士皮包选购的运行结果1
+<p>如果将 XML 配置文件按如下修改：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">config</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">className</span>&gt;</span>Red<span class="tag">&lt;/<span class="name">className</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">className</span>&gt;</span>Wallet<span class="tag">&lt;/<span class="name">className</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">config</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>则程序的运行结果如图 4 所示。</p>
+<img src="/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/4.jpg" class="" title="图4 女士皮包选购的运行结果2">图4 女士皮包选购的运行结果2
+
+<h2 id="桥接模式的应用场景"><a href="#桥接模式的应用场景" class="headerlink" title="桥接模式的应用场景"></a>桥接模式的应用场景</h2><p>桥接模式通常适用于以下场景。</p>
+<ul>
+<li>当一个类存在两个独立变化的维度，且这两个维度都需要进行扩展时。</li>
+<li>当一个系统不希望使用继承或因为多层次继承导致系统类的个数急剧增加时。</li>
+<li>当一个系统需要在构件的抽象化角色和具体化角色之间增加更多的灵活性时。</li>
+</ul>
+<h2 id="桥接模式模式的扩展"><a href="#桥接模式模式的扩展" class="headerlink" title="桥接模式模式的扩展"></a>桥接模式模式的扩展</h2><p>在软件开发中，有时桥接（Bridge）模式可与适配器模式联合使用。当桥接（Bridge）模式的实现化角色的接口与现有类的接口不一致时，可以在二者中间定义一个适配器将二者连接起来，其具体结构图如图 5 所示。</p>
+<img src="/dev/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/5.gif" class="" title="图5 桥接模式与适配器模式联用的结构图">图5 桥接模式与适配器模式联用的结构图
+
     </div>
 
     
@@ -240,6 +299,10 @@
 
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/" rel="tag"><i class="fa fa-tag"></i> 桥接模式</a>
+          </div>
 
         
 
@@ -313,6 +376,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式的定义与特点"><span class="nav-number">1.</span> <span class="nav-text">桥接模式的定义与特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式的结构与实现"><span class="nav-number">2.</span> <span class="nav-text">桥接模式的结构与实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#模式的结构"><span class="nav-number">2.1.</span> <span class="nav-text">模式的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模式的实现"><span class="nav-number">2.2.</span> <span class="nav-text">模式的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式的应用实例"><span class="nav-number">3.</span> <span class="nav-text">桥接模式的应用实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式的应用场景"><span class="nav-number">4.</span> <span class="nav-text">桥接模式的应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#桥接模式模式的扩展"><span class="nav-number">5.</span> <span class="nav-text">桥接模式模式的扩展</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -328,7 +392,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/dev/archives/">
         
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -341,7 +405,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/dev/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -356,6 +420,17 @@
   </div>
 
 
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
 
       </div>
 

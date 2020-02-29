@@ -20,18 +20,21 @@
     var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="每天成长一点点">
+  <meta name="description" content="里氏替换原则的定义里氏替换原则（Liskov Substitution Principle，LSP）由麻省理工学院计算机科学实验室的里斯科夫（Liskov）女士在 1987 年的“面向对象技术的高峰会议”（OOPSLA）上发表的一篇文章《数据抽象和层次》（Data Abstraction and Hierarchy）里提出来的，她提出：继承必须确保超类所拥有的性质在子类中仍然成立（Inherita">
 <meta property="og:type" content="article">
 <meta property="og:title" content="05-面向对象设计原则-里氏替换原则">
 <meta property="og:url" content="http://3927.group/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/index.html">
 <meta property="og:site_name" content="3927学习吧">
-<meta property="og:description" content="每天成长一点点">
+<meta property="og:description" content="里氏替换原则的定义里氏替换原则（Liskov Substitution Principle，LSP）由麻省理工学院计算机科学实验室的里斯科夫（Liskov）女士在 1987 年的“面向对象技术的高峰会议”（OOPSLA）上发表的一篇文章《数据抽象和层次》（Data Abstraction and Hierarchy）里提出来的，她提出：继承必须确保超类所拥有的性质在子类中仍然成立（Inherita">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/1.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/2.gif">
 <meta property="article:published_time" content="2017-01-08T16:40:25.000Z">
-<meta property="article:modified_time" content="2020-02-28T17:07:39.695Z">
+<meta property="article:modified_time" content="2020-02-28T18:20:20.999Z">
 <meta property="article:author" content="Jackzhou">
-<meta property="article:tag" content="技术，笔记">
+<meta property="article:tag" content="里氏替换原则">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/1.gif">
 
 <link rel="canonical" href="http://3927.group/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/">
 
@@ -126,7 +129,7 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">15</span></a>
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">47</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -136,7 +139,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">41</span></a>
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">37</span></a>
 
   </li>
   </ul>
@@ -212,7 +215,32 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <h2 id="里氏替换原则的定义"><a href="#里氏替换原则的定义" class="headerlink" title="里氏替换原则的定义"></a>里氏替换原则的定义</h2><p>里氏替换原则（Liskov Substitution Principle，LSP）由麻省理工学院计算机科学实验室的里斯科夫（Liskov）女士在 1987 年的“面向对象技术的高峰会议”（OOPSLA）上发表的一篇文章《数据抽象和层次》（Data Abstraction and Hierarchy）里提出来的，她提出：继承必须确保超类所拥有的性质在子类中仍然成立（Inheritance should ensure that any property proved about supertype objects also holds for subtype objects）。</p>
+<p>里氏替换原则主要阐述了有关继承的一些原则，也就是什么时候应该使用继承，什么时候不应该使用继承，以及其中蕴含的原理。里氏替换原是继承复用的基础，它反映了基类与子类之间的关系，是对开闭原则的补充，是对实现抽象化的具体步骤的规范。</p>
+<h2 id="里氏替换原则的作用"><a href="#里氏替换原则的作用" class="headerlink" title="里氏替换原则的作用"></a>里氏替换原则的作用</h2><p>里氏替换原则的主要作用如下。</p>
+<ul>
+<li>里氏替换原则是实现开闭原则的重要方式之一。</li>
+<li>它克服了继承中重写父类造成的可复用性变差的缺点。</li>
+<li>它是动作正确性的保证。即类的扩展不会给已有的系统引入新的错误，降低了代码出错的可能性。</li>
+</ul>
+<h2 id="里氏替换原则的实现方法"><a href="#里氏替换原则的实现方法" class="headerlink" title="里氏替换原则的实现方法"></a>里氏替换原则的实现方法</h2><p>里氏替换原则通俗来讲就是：子类可以扩展父类的功能，但不能改变父类原有的功能。也就是说：子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
+<p>如果通过重写父类的方法来完成新的功能，这样写起来虽然简单，但是整个继承体系的可复用性会比较差，特别是运用多态比较频繁时，程序运行出错的概率会非常大。</p>
+<p>如果程序违背了里氏替换原则，则继承类的对象在基类出现的地方会出现运行错误。这时其修正方法是：取消原来的继承关系，重新设计它们之间的关系。</p>
+<p>关于里氏替换原则的例子，最有名的是“正方形不是长方形”。当然，生活中也有很多类似的例子，例如，企鹅、鸵鸟和几维鸟从生物学的角度来划分，它们属于鸟类；但从类的继承关系来看，由于它们不能继承“鸟”会飞的功能，所以它们不能定义成“鸟”的子类。同样，由于“气球鱼”不会游泳，所以不能定义成“鱼”的子类；“玩具炮”炸不了敌人，所以不能定义成“炮”的子类等。</p>
+<p>下面以“几维鸟不是鸟”为例来说明里氏替换原则。</p>
+<p>【例】里氏替换原则在“几维鸟不是鸟”实例中的应用。</p>
+<p>分析：鸟一般都会飞行，如燕子的飞行速度大概是每小时 120 千米。但是新西兰的几维鸟由于翅膀退化无法飞行。假如要设计一个实例，计算这两种鸟飞行 300 千米要花费的时间。显然，拿燕子来测试这段代码，结果正确，能计算出所需要的时间；但拿几维鸟来测试，结果会发生“除零异常”或是“无穷大”，明显不符合预期，其类图如图 1 所示。</p>
+<img src="/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/1.gif" class="" title="图1 “几维鸟不是鸟”实例的类图">图1 “几维鸟不是鸟”实例的类图
+
+<p>程序代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> principle;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LSPtest</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Bird bird1=<span class="keyword">new</span> Swallow();</span><br><span class="line">        Bird bird2=<span class="keyword">new</span> BrownKiwi();</span><br><span class="line">        bird1.setSpeed(<span class="number">120</span>);</span><br><span class="line">        bird2.setSpeed(<span class="number">120</span>);</span><br><span class="line">        System.out.println(<span class="string">"如果飞行300公里："</span>);</span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            System.out.println(<span class="string">"燕子将飞行"</span>+bird1.getFlyTime(<span class="number">300</span>)+<span class="string">"小时."</span>);</span><br><span class="line">            System.out.println(<span class="string">"几维鸟将飞行"</span>+bird2.getFlyTime(<span class="number">300</span>)+<span class="string">"小时。"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span>(Exception err)</span><br><span class="line">        &#123;</span><br><span class="line">            System.out.println(<span class="string">"发生错误了!"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//鸟类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bird</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> flySpeed;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSpeed</span><span class="params">(<span class="keyword">double</span> speed)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        flySpeed=speed;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getFlyTime</span><span class="params">(<span class="keyword">double</span> distance)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span>(distance/flySpeed);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//燕子类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Swallow</span> <span class="keyword">extends</span> <span class="title">Bird</span></span>&#123;&#125;</span><br><span class="line"><span class="comment">//几维鸟类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BrownKiwi</span> <span class="keyword">extends</span> <span class="title">Bird</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSpeed</span><span class="params">(<span class="keyword">double</span> speed)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">           flySpeed=<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序的运行结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">如果飞行300公里：</span><br><span class="line">燕子将飞行2.5小时.</span><br><span class="line">几维鸟将飞行Infinity小时。</span><br></pre></td></tr></table></figure>
+
+<p>程序运行错误的原因是：几维鸟类重写了鸟类的 setSpeed(double speed) 方法，这违背了里氏替换原则。正确的做法是：取消几维鸟原来的继承关系，定义鸟和几维鸟的更一般的父类，如动物类，它们都有奔跑的能力。几维鸟的飞行速度虽然为 0，但奔跑速度不为 0，可以计算出其奔跑 300 千米所要花费的时间。其类图如图 2 所示。</p>
+<img src="/dev/2017/01/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/05-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/2.gif" class="" title="图2 “几维鸟是动物”实例的类图">图2 “几维鸟是动物”实例的类图
+
     </div>
 
     
@@ -240,6 +268,10 @@
 
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/" rel="tag"><i class="fa fa-tag"></i> 里氏替换原则</a>
+          </div>
 
         
 
@@ -313,6 +345,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#里氏替换原则的定义"><span class="nav-number">1.</span> <span class="nav-text">里氏替换原则的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#里氏替换原则的作用"><span class="nav-number">2.</span> <span class="nav-text">里氏替换原则的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#里氏替换原则的实现方法"><span class="nav-number">3.</span> <span class="nav-text">里氏替换原则的实现方法</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -328,7 +361,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/dev/archives/">
         
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -341,7 +374,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/dev/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -356,6 +389,17 @@
   </div>
 
 
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
 
       </div>
 

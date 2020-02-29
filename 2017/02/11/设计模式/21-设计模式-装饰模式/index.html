@@ -20,18 +20,24 @@
     var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="每天成长一点点">
+  <meta name="description" content="在现实生活中，常常需要对现有产品增加新的功能或美化其外观，如房子装修、相片加相框等。在软件开发过程中，有时想用一些现存的组件。这些组件可能只是完成了一些核心功能。但在不改变其结构的情况下，可以动态地扩展其功能。所有这些都可以釆用装饰模式来实现。 装饰模式的定义与特点装饰（Decorator）模式的定义：指在不改变现有对象结构的情况下，动态地给该对象增加一些职责（即增加其额外功能）的模式，它属于对象">
 <meta property="og:type" content="article">
 <meta property="og:title" content="21-设计模式-装饰模式">
 <meta property="og:url" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="3927学习吧">
-<meta property="og:description" content="每天成长一点点">
+<meta property="og:description" content="在现实生活中，常常需要对现有产品增加新的功能或美化其外观，如房子装修、相片加相框等。在软件开发过程中，有时想用一些现存的组件。这些组件可能只是完成了一些核心功能。但在不改变其结构的情况下，可以动态地扩展其功能。所有这些都可以釆用装饰模式来实现。 装饰模式的定义与特点装饰（Decorator）模式的定义：指在不改变现有对象结构的情况下，动态地给该对象增加一些职责（即增加其额外功能）的模式，它属于对象">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/1.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/2.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/3.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/4.gif">
+<meta property="og:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/5.gif">
 <meta property="article:published_time" content="2017-02-10T16:48:44.000Z">
-<meta property="article:modified_time" content="2020-02-28T17:07:39.696Z">
+<meta property="article:modified_time" content="2020-02-29T05:28:09.133Z">
 <meta property="article:author" content="Jackzhou">
-<meta property="article:tag" content="技术，笔记">
+<meta property="article:tag" content="装饰模式">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/1.gif">
 
 <link rel="canonical" href="http://3927.group/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/">
 
@@ -126,7 +132,7 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">15</span></a>
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">47</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -136,7 +142,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">41</span></a>
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">37</span></a>
 
   </li>
   </ul>
@@ -212,7 +218,57 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <p>在现实生活中，常常需要对现有产品增加新的功能或美化其外观，如房子装修、相片加相框等。在软件开发过程中，有时想用一些现存的组件。这些组件可能只是完成了一些核心功能。但在不改变其结构的情况下，可以动态地扩展其功能。所有这些都可以釆用装饰模式来实现。</p>
+<h2 id="装饰模式的定义与特点"><a href="#装饰模式的定义与特点" class="headerlink" title="装饰模式的定义与特点"></a>装饰模式的定义与特点</h2><p>装饰（Decorator）模式的定义：指在不改变现有对象结构的情况下，动态地给该对象增加一些职责（即增加其额外功能）的模式，它属于对象结构型模式。</p>
+<p>装饰（Decorator）模式的主要优点有：</p>
+<ul>
+<li>采用装饰模式扩展对象的功能比采用继承方式更加灵活。</li>
+<li>可以设计出多个不同的具体装饰类，创造出多个不同行为的组合。</li>
+</ul>
+<p>其主要缺点是：装饰模式增加了许多子类，如果过度使用会使程序变得很复杂。</p>
+<h2 id="装饰模式的结构与实现"><a href="#装饰模式的结构与实现" class="headerlink" title="装饰模式的结构与实现"></a>装饰模式的结构与实现</h2><p>通常情况下，扩展一个类的功能会使用继承方式来实现。但继承具有静态特征，耦合度高，并且随着扩展功能的增多，子类会很膨胀。如果使用组合关系来创建一个包装对象（即装饰对象）来包裹真实对象，并在保持真实对象的类结构不变的前提下，为其提供额外的功能，这就是装饰模式的目标。下面来分析其基本结构和实现方法。</p>
+<h3 id="模式的结构"><a href="#模式的结构" class="headerlink" title="模式的结构"></a>模式的结构</h3><p>装饰模式主要包含以下角色。</p>
+<ul>
+<li>抽象构件（Component）角色：定义一个抽象接口以规范准备接收附加责任的对象。</li>
+<li>具体构件（Concrete    Component）角色：实现抽象构件，通过装饰角色为其添加一些职责。</li>
+<li>抽象装饰（Decorator）角色：继承抽象构件，并包含具体构件的实例，可以通过其子类扩展具体构件的功能。</li>
+<li>具体装饰（ConcreteDecorator）角色：实现抽象装饰的相关方法，并给具体构件对象添加附加的责任。</li>
+</ul>
+<p>装饰模式的结构图如图 1 所示。</p>
+<img src="/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/1.gif" class="" title="图1 装饰模式的结构图">图1 装饰模式的结构图
+
+<h3 id="模式的实现"><a href="#模式的实现" class="headerlink" title="模式的实现"></a>模式的实现</h3><p>装饰模式的实现代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> decorator;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DecoratorPattern</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Component p=<span class="keyword">new</span> ConcreteComponent();</span><br><span class="line">        p.operation();</span><br><span class="line">        System.out.println(<span class="string">"---------------------------------"</span>);</span><br><span class="line">        Component d=<span class="keyword">new</span> ConcreteDecorator(p);</span><br><span class="line">        d.operation();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象构件角色</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span>  <span class="title">Component</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operation</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体构件角色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConcreteComponent</span> <span class="keyword">implements</span> <span class="title">Component</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConcreteComponent</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"创建具体构件角色"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operation</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"调用具体构件角色的方法operation()"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象装饰角色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Decorator</span> <span class="keyword">implements</span> <span class="title">Component</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Component component;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Decorator</span><span class="params">(Component component)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.component=component;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operation</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        component.operation();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体装饰角色</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConcreteDecorator</span> <span class="keyword">extends</span> <span class="title">Decorator</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConcreteDecorator</span><span class="params">(Component component)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(component);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operation</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.operation();</span><br><span class="line">        addedFunction();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addedFunction</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"为具体构件角色增加额外的功能addedFunction()"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序运行结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">创建具体构件角色</span><br><span class="line">调用具体构件角色的方法operation()</span><br><span class="line">---------------------------------</span><br><span class="line">调用具体构件角色的方法operation()</span><br><span class="line">为具体构件角色增加额外的功能addedFunction()</span><br></pre></td></tr></table></figure>
+
+<h2 id="装饰模式的应用实例"><a href="#装饰模式的应用实例" class="headerlink" title="装饰模式的应用实例"></a>装饰模式的应用实例</h2><p>【例1】用装饰模式实现游戏角色“莫莉卡·安斯兰”的变身。</p>
+<p>分析：在《恶魔战士》中，游戏角色“莫莉卡·安斯兰”的原身是一个可爱少女，但当她变身时，会变成头顶及背部延伸出蝙蝠状飞翼的女妖，当然她还可以变为穿着漂亮外衣的少女。这些都可用装饰模式来实现，在本实例中的“莫莉卡”原身有 setImage(String t) 方法决定其显示方式，而其 变身“蝙蝠状女妖”和“着装少女”可以用 setChanger() 方法来改变其外观，原身与变身后的效果用 display() 方法来显示（点此下载其原身和变身后的图片），图 2 所示是其结构图。</p>
+<img src="/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/2.gif" class="" title="图2 游戏角色“莫莉卡·安斯兰”的结构图">图2 游戏角色“莫莉卡·安斯兰”的结构图
+<p>程序代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> decorator;</span><br><span class="line"><span class="keyword">import</span> java.awt.*;</span><br><span class="line"><span class="keyword">import</span> javax.swing.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MorriganAensland</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Morrigan m0=<span class="keyword">new</span> original();</span><br><span class="line">        m0.display();</span><br><span class="line">        Morrigan m1=<span class="keyword">new</span> Succubus(m0);</span><br><span class="line">        m1.display();</span><br><span class="line">        Morrigan m2=<span class="keyword">new</span> Girl(m0);</span><br><span class="line">        m2.display();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象构件角色：莫莉卡</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span>  <span class="title">Morrigan</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体构件角色：原身</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">original</span> <span class="keyword">extends</span> <span class="title">JFrame</span> <span class="keyword">implements</span> <span class="title">Morrigan</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line">    <span class="keyword">private</span> String t=<span class="string">"Morrigan0.jpg"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">original</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="string">"《恶魔战士》中的莫莉卡·安斯兰"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setImage</span><span class="params">(String t)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.t=t;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.setLayout(<span class="keyword">new</span> FlowLayout());</span><br><span class="line">        JLabel l1=<span class="keyword">new</span> JLabel(<span class="keyword">new</span> ImageIcon(<span class="string">"src/decorator/"</span>+t));</span><br><span class="line">        <span class="keyword">this</span>.add(l1);</span><br><span class="line">        <span class="keyword">this</span>.pack();</span><br><span class="line">        <span class="keyword">this</span>.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  </span><br><span class="line">        <span class="keyword">this</span>.setVisible(<span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//抽象装饰角色：变形</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Changer</span> <span class="keyword">implements</span> <span class="title">Morrigan</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    Morrigan m;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Changer</span><span class="params">(Morrigan m)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.m=m;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        m.display();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体装饰角色：女妖</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Succubus</span> <span class="keyword">extends</span> <span class="title">Changer</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Succubus</span><span class="params">(Morrigan m)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(m);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        setChanger();</span><br><span class="line">        <span class="keyword">super</span>.display();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setChanger</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        ((original) <span class="keyword">super</span>.m).setImage(<span class="string">"Morrigan1.jpg"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//具体装饰角色：少女</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Girl</span> <span class="keyword">extends</span> <span class="title">Changer</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Girl</span><span class="params">(Morrigan m)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(m);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        setChanger();</span><br><span class="line">        <span class="keyword">super</span>.display();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setChanger</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        ((original) <span class="keyword">super</span>.m).setImage(<span class="string">"Morrigan2.jpg"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序运行结果如图 3 所示。</p>
+<img src="/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/3.gif" class="" title="图3 游戏角色“莫莉卡·安斯兰”的变身">图3 游戏角色“莫莉卡·安斯兰”的变身
+
+<h2 id="装饰模式的应用场景"><a href="#装饰模式的应用场景" class="headerlink" title="装饰模式的应用场景"></a>装饰模式的应用场景</h2><p>前面讲解了关于装饰模式的结构与特点，下面介绍其适用的应用场景，装饰模式通常在以下几种情况使用。</p>
+<ul>
+<li>当需要给一个现有类添加附加职责，而又不能采用生成子类的方法进行扩充时。例如，该类被隐藏或者该类是终极类或者采用继承方式会产生大量的子类。</li>
+<li>当需要通过对现有的一组基本功能进行排列组合而产生非常多的功能时，采用继承关系很难实现，而采用装饰模式却很好实现。</li>
+<li>当对象的功能要求可以动态地添加，也可以再动态地撤销时。</li>
+</ul>
+<p>装饰模式在 Java 语言中的最著名的应用莫过于 Java I/O 标准库的设计了。例如，InputStream 的子类 FilterInputStream，OutputStream 的子类 FilterOutputStream，Reader 的子类 BufferedReader 以及 FilterReader，还有 Writer 的子类 BufferedWriter、FilterWriter 以及 PrintWriter 等，它们都是抽象装饰类。</p>
+<p>下面代码是为 FileReader 增加缓冲区而采用的装饰类 BufferedReader 的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BufferedReader in=<span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(<span class="string">"filename.txtn));</span></span><br><span class="line"><span class="string">String s=in.readLine();</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="装饰模式的扩展"><a href="#装饰模式的扩展" class="headerlink" title="装饰模式的扩展"></a>装饰模式的扩展</h2><p>装饰模式所包含的 4 个角色不是任何时候都要存在的，在有些应用环境下模式是可以简化的，如以下两种情况。</p>
+<ul>
+<li>如果只有一个具体构件而没有抽象构件时，可以让抽象装饰继承具体构件，其结构图如图 4 所示。<img src="/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/4.gif" class="" title="图4 只有一个具体构件的装饰模式">图4 只有一个具体构件的装饰模式</li>
+<li>如果只有一个具体装饰时，可以将抽象装饰和具体装饰合并，其结构图如图 5 所示。<img src="/dev/2017/02/11/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/5.gif" class="" title="图5 只有一个具体装饰的装饰模式">图5 只有一个具体装饰的装饰模式
+</li>
+</ul>
+
     </div>
 
     
@@ -240,6 +296,10 @@
 
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/" rel="tag"><i class="fa fa-tag"></i> 装饰模式</a>
+          </div>
 
         
 
@@ -313,6 +373,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰模式的定义与特点"><span class="nav-number">1.</span> <span class="nav-text">装饰模式的定义与特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰模式的结构与实现"><span class="nav-number">2.</span> <span class="nav-text">装饰模式的结构与实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#模式的结构"><span class="nav-number">2.1.</span> <span class="nav-text">模式的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模式的实现"><span class="nav-number">2.2.</span> <span class="nav-text">模式的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰模式的应用实例"><span class="nav-number">3.</span> <span class="nav-text">装饰模式的应用实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰模式的应用场景"><span class="nav-number">4.</span> <span class="nav-text">装饰模式的应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰模式的扩展"><span class="nav-number">5.</span> <span class="nav-text">装饰模式的扩展</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -328,7 +389,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/dev/archives/">
         
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -341,7 +402,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/dev/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -356,6 +417,17 @@
   </div>
 
 
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
 
       </div>
 
