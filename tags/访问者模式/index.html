@@ -124,17 +124,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">47</span></a>
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">63</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">2</span></a>
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">4</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">37</span></a>
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">64</span></a>
 
   </li>
   </ul>
@@ -189,8 +189,8 @@
       </div>
 
       <h2 class="post-title">
-          <a class="post-title-link" href="/dev/2017/03/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/34-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/" itemprop="url">
-            <span itemprop="name">34-设计模式-访问者模式</span>
+          <a class="post-title-link" href="/dev/2017/03/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/" itemprop="url">
+            <span itemprop="name">设计模式-访问者模式</span>
           </a>
       </h2>
 
@@ -270,20 +270,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/dev/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">64</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/dev/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/dev/tags/">
           
-        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -382,6 +382,61 @@
 
 
   
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

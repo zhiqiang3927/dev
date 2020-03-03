@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="讲三种时间复杂度是 O(n) 的排序算法：桶排序、计数排序、基数排序。因为这些排序算法的时间复杂度是线性的，所以我们把这类排序算法叫作线性排序（Linear sort）。之所以能做到线性的时间复杂度，主要原因是，这三个算法是非基于比较的排序算法，都不涉及元素之间的比较操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线性排序：如何根据年龄给100万用户数据排序">
+<meta property="og:url" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="讲三种时间复杂度是 O(n) 的排序算法：桶排序、计数排序、基数排序。因为这些排序算法的时间复杂度是线性的，所以我们把这类排序算法叫作线性排序（Linear sort）。之所以能做到线性的时间复杂度，主要原因是，这三个算法是非基于比较的排序算法，都不涉及元素之间的比较操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/1.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/2.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/3.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/4.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/5.jpg">
+<meta property="article:published_time" content="2018-10-20T14:36:58.000Z">
+<meta property="article:modified_time" content="2020-03-02T15:05:36.521Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="排序">
+<meta property="article:tag" content="桶排序">
+<meta property="article:tag" content="计数排序">
+<meta property="article:tag" content="基数排序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/1.jpg">
+
+<link rel="canonical" href="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>线性排序：如何根据年龄给100万用户数据排序 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">64</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          线性排序：如何根据年龄给100万用户数据排序
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2018-10-20 22:36:58" itemprop="dateCreated datePublished" datetime="2018-10-20T22:36:58+08:00">2018-10-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>讲三种时间复杂度是 O(n) 的排序算法：桶排序、计数排序、基数排序。因为这些排序算法的时间复杂度是线性的，所以我们把这类排序算法叫作<strong>线性排序</strong>（Linear sort）。之所以能做到线性的时间复杂度，主要原因是，这三个算法是非基于比较的排序算法，都不涉及元素之间的比较操作。<br><a id="more"></a><br>这几种排序算法理解起来都不难，时间、空间复杂度分析起来也很简单，但是对要排序的数据要求很苛刻，所以我们今天<strong>学习重点的是掌握这些排序算法的适用场景</strong>。</p>
+<p>按照惯例，我先给你出一道思考题：如何根据年龄给 100 万用户排序？ 你可能会说，我用上一节课讲的归并、快排就可以搞定啊！是的，它们也可以完成功能，但是时间复杂度最低也是 $O(n log n)$。有没有更快的排序方法呢？让我们一起进入今天的内容！</p>
+<h2 id="桶排序（Bucket-sort）"><a href="#桶排序（Bucket-sort）" class="headerlink" title="桶排序（Bucket sort）"></a>桶排序（Bucket sort）</h2><p>首先，我们来看桶排序。桶排序，顾名思义，会用到“桶”，核心思想是将要排序的数据分到几个有序的桶里，每个桶里的数据再单独进行排序。桶内排完序之后，再把每个桶里的数据按照顺序依次取出，组成的序列就是有序的了。<img src="/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/1.jpg" class="" title="图1">桶排序的时间复杂度为什么是 O(n) 呢？我们一块儿来分析一下。</p>
+<p>如果要排序的数据有 n 个，我们把它们均匀地划分到 m 个桶内，每个桶里就有 k=n/m 个元素。每个桶内部使用快速排序，时间复杂度为 $O(k <em> log k)$。m 个桶排序的时间复杂度就是 $O(m </em> k <em> log k)$，因为 k=n/m，所以整个桶排序的时间复杂度就是 O(n</em>log(n/m))。当桶的个数 m 接近数据个数 n 时，log(n/m) 就是一个非常小的常量，这个时候桶排序的时间复杂度接近 O(n)。</p>
+<p><strong>桶排序看起来很优秀，那它是不是可以替代我们之前讲的排序算法呢？</strong></p>
+<p>答案当然是否定的。为了让你轻松理解桶排序的核心思想，我刚才做了很多假设。实际上，桶排序对要排序数据的要求是非常苛刻的。</p>
+<ul>
+<li><p>首先，要排序的数据需要很容易就能划分成 m 个桶，并且，桶与桶之间有着天然的大小顺序。这样每个桶内的数据都排序完之后，桶与桶之间的数据不需要再进行排序。</p>
+</li>
+<li><p>其次，数据在各个桶之间的分布是比较均匀的。如果数据经过桶的划分之后，有些桶里的数据非常多，有些非常少，很不平均，那桶内数据排序的时间复杂度就不是常量级了。在极端情况下，如果数据都被划分到一个桶里，那就退化为 $O(n log n)$ 的排序算法了。</p>
+</li>
+</ul>
+<p><strong>桶排序比较适合用在外部排序中</strong>。所谓的外部排序就是数据存储在外部磁盘中，数据量比较大，内存有限，无法将数据全部加载到内存中。</p>
+<p>比如说我们有 10GB 的订单数据，我们希望按订单金额（假设金额都是正整数）进行排序，但是我们的内存有限，只有几百 MB，没办法一次性把 10GB 的数据都加载到内存中。这个时候该怎么办呢？</p>
+<p>现在我来讲一下，如何借助桶排序的处理思想来解决这个问题。</p>
+<p>我们可以先扫描一遍文件，看订单金额所处的数据范围。假设经过扫描之后我们得到，订单金额最小是 1 元，最大是 10 万元。我们将所有订单根据金额划分到 100 个桶里，第一个桶我们存储金额在 1 元到 1000 元之内的订单，第二桶存储金额在 1001 元到 2000 元之内的订单，以此类推。每一个桶对应一个文件，并且按照金额范围的大小顺序编号命名（00，01，02…99）。</p>
+<p>理想的情况下，如果订单金额在 1 到 10 万之间均匀分布，那订单会被均匀划分到 100 个文件中，每个小文件中存储大约 100MB 的订单数据，我们就可以将这 100 个小文件依次放到内存中，用快排来排序。等所有文件都排好序之后，我们只需要按照文件编号，从小到大依次读取每个小文件中的订单数据，并将其写入到一个文件中，那这个文件中存储的就是按照金额从小到大排序的订单数据了。</p>
+<p>不过，你可能也发现了，订单按照金额在 1 元到 10 万元之间并不一定是均匀分布的 ，所以 10GB 订单数据是无法均匀地被划分到 100 个文件中的。有可能某个金额区间的数据特别多，划分之后对应的文件就会很大，没法一次性读入内存。这又该怎么办呢？</p>
+<p>针对这些划分之后还是比较大的文件，我们可以继续划分，比如，订单金额在 1 元到 1000 元之间的比较多，我们就将这个区间继续划分为 10 个小区间，1 元到 100 元，101 元到 200 元，201 元到 300 元…901 元到 1000 元。如果划分之后，101 元到 200 元之间的订单还是太多，无法一次性读入内存，那就继续再划分，直到所有的文件都能读入内存为止。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span>:桶排序算法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BucketSort</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 桶排序</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr 数组</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bucketSize 桶容量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bucketSort</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> bucketSize)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (arr.length &lt; <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 数组最小值</span></span><br><span class="line">        <span class="keyword">int</span> minValue = arr[<span class="number">0</span>];</span><br><span class="line">        <span class="comment">// 数组最大值</span></span><br><span class="line">        <span class="keyword">int</span> maxValue = arr[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[i] &lt; minValue) &#123;</span><br><span class="line">                minValue = arr[i];</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (arr[i] &gt; maxValue) &#123;</span><br><span class="line">                maxValue = arr[i];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 桶数量</span></span><br><span class="line">        <span class="keyword">int</span> bucketCount = (maxValue - minValue) / bucketSize + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span>[][] buckets = <span class="keyword">new</span> <span class="keyword">int</span>[bucketCount][bucketSize];</span><br><span class="line">        <span class="keyword">int</span>[] indexArr = <span class="keyword">new</span> <span class="keyword">int</span>[bucketCount];</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将数组中值分配到各个桶里</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> bucketIndex = (arr[i] - minValue) / bucketSize;</span><br><span class="line">            <span class="keyword">if</span> (indexArr[bucketIndex] == buckets[bucketIndex].length) &#123;</span><br><span class="line">                ensureCapacity(buckets, bucketIndex);</span><br><span class="line">            &#125;</span><br><span class="line">            buckets[bucketIndex][indexArr[bucketIndex]++] = arr[i];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对每个桶进行排序，这里使用了快速排序</span></span><br><span class="line">        <span class="keyword">int</span> k = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; buckets.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (indexArr[i] == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            quickSortC(buckets[i], <span class="number">0</span>, indexArr[i] - <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; indexArr[i]; j++) &#123;</span><br><span class="line">                arr[k++] = buckets[i][j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 数组扩容</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> buckets</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bucketIndex</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">ensureCapacity</span><span class="params">(<span class="keyword">int</span>[][] buckets, <span class="keyword">int</span> bucketIndex)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] tempArr = buckets[bucketIndex];</span><br><span class="line">        <span class="keyword">int</span>[] newArr = <span class="keyword">new</span> <span class="keyword">int</span>[tempArr.length * <span class="number">2</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; tempArr.length; j++) &#123;</span><br><span class="line">            newArr[j] = tempArr[j];</span><br><span class="line">        &#125;</span><br><span class="line">        buckets[bucketIndex] = newArr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快速排序递归函数</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> p</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> r</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">quickSortC</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> p, <span class="keyword">int</span> r)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (p &gt;= r) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> q = partition(arr, p, r);</span><br><span class="line">        quickSortC(arr, p, q - <span class="number">1</span>);</span><br><span class="line">        quickSortC(arr, q + <span class="number">1</span>, r);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 分区函数</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> p</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> r</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 分区点位置</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> p, <span class="keyword">int</span> r)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> pivot = arr[r];</span><br><span class="line">        <span class="keyword">int</span> i = p;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = p; j &lt; r; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[j] &lt;= pivot) &#123;</span><br><span class="line">                swap(arr, i, j);</span><br><span class="line">                i++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        swap(arr, i, r);</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 交换</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> i</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> j</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i == j) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> tmp = arr[i];</span><br><span class="line">        arr[i] = arr[j];</span><br><span class="line">        arr[j] = tmp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="计数排序（Counting-sort）"><a href="#计数排序（Counting-sort）" class="headerlink" title="计数排序（Counting sort）"></a>计数排序（Counting sort）</h2><p>我个人觉得，<strong>计数排序其实是桶排序的一种特殊情况</strong>。当要排序的 n 个数据，所处的范围并不大的时候，比如最大值是 k，我们就可以把数据划分成 k 个桶。每个桶内的数据值都是相同的，省掉了桶内排序的时间。</p>
+<p>我们都经历过高考，高考查分数系统你还记得吗？我们查分数的时候，系统会显示我们的成绩以及所在省的排名。如果你所在的省有 50 万考生，如何通过成绩快速排序得出名次呢？</p>
+<p>考生的满分是 900 分，最小是 0 分，这个数据的范围很小，所以我们可以分成 901 个桶，对应分数从 0 分到 900 分。根据考生的成绩，我们将这 50 万考生划分到这 901 个桶里。桶内的数据都是分数相同的考生，所以并不需要再进行排序。我们只需要依次扫描每个桶，将桶内的考生依次输出到一个数组中，就实现了 50 万考生的排序。因为只涉及扫描遍历操作，所以时间复杂度是 O(n)。</p>
+<p>计数排序的算法思想就是这么简单，跟桶排序非常类似，只是桶的大小粒度不一样。<strong>不过，为什么这个排序算法叫“计数”排序呢？“计数”的含义来自哪里呢</strong>？</p>
+<p>想弄明白这个问题，我们就要来看计数排序算法的实现方法。我还拿考生那个例子来解释。为了方便说明，我对数据规模做了简化。假设只有 8 个考生，分数在 0 到 5 分之间。这 8 个考生的成绩我们放在一个数组 A[8] 中，它们分别是：2，5，3，0，2，3，0，3。</p>
+<p>考生的成绩从 0 到 5 分，我们使用大小为 6 的数组 C[6] 表示桶，其中下标对应分数。不过，C[6] 内存储的并不是考生，而是对应的考生个数。像我刚刚举的那个例子，我们只需要遍历一遍考生分数，就可以得到 C[6] 的值。</p>
+<p>从图中可以看出，分数为 3 分的考生有 3 个，小于 3 分的考生有 4 个，所以，成绩为 3 分的考生在排序之后的有序数组 R[8] 中，会保存下标 4，5，6 的位置。<img src="/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/2.jpg" class="" title="图2">那我们如何快速计算出，每个分数的考生在有序数组中对应的存储位置呢？这个处理方法非常巧妙，很不容易想到。</p>
+<p>思路是这样的：我们对 C[6] 数组顺序求和，C[6] 存储的数据就变成了下面这样子。C[k] 里存储小于等于分数 k 的考生个数。<img src="/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/3.jpg" class="" title="图3">有了前面的数据准备之后，现在我就要讲计数排序中最复杂、最难理解的一部分了，请集中精力跟着我的思路！</p>
+<p>我们从后到前依次扫描数组 A。比如，当扫描到 3 时，我们可以从数组 C 中取出下标为 3 的值 7，也就是说，到目前为止，包括自己在内，分数小于等于 3 的考生有 7 个，也就是说 3 是数组 R 中的第 7 个元素（也就是数组 R 中下标为 6 的位置）。当 3 放入到数组 R 中后，小于等于 3 的元素就只剩下了 6 个了，所以相应的 C[3] 要减 1，变成 6。</p>
+<p>以此类推，当我们扫描到第 2 个分数为 3 的考生的时候，就会把它放入数组 R 中的第 6 个元素的位置（也就是下标为 5 的位置）。当我们扫描完整个数组 A 后，数组 R 内的数据就是按照分数从小到大有序排列的了。<img src="/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/4.jpg" class="" title="图4">上面的过程有点复杂，我写成了代码，你可以对照着看下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计数排序，a是数组，n是数组大小。假设数组中存储的都是非负整数。</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">countingSort</span><span class="params">(<span class="keyword">int</span>[] a, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 查找数组中数据的范围</span></span><br><span class="line">  <span class="keyword">int</span> max = a[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    <span class="keyword">if</span> (max &lt; a[i]) &#123;</span><br><span class="line">      max = a[i];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span>[] c = <span class="keyword">new</span> <span class="keyword">int</span>[max + <span class="number">1</span>]; <span class="comment">// 申请一个计数数组c，下标大小[0,max]</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;= max; ++i) &#123;</span><br><span class="line">    c[i] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 计算每个元素的个数，放入c中</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    c[a[i]]++;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 依次累加</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= max; ++i) &#123;</span><br><span class="line">    c[i] = c[i-<span class="number">1</span>] + c[i];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 临时数组r，存储排序之后的结果</span></span><br><span class="line">  <span class="keyword">int</span>[] r = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">  <span class="comment">// 计算排序的关键步骤，有点难理解</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = n - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">    <span class="keyword">int</span> index = c[a[i]]-<span class="number">1</span>;</span><br><span class="line">    r[index] = a[i];</span><br><span class="line">    c[a[i]]--;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将结果拷贝给a数组</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    a[i] = r[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种利用另外一个数组来计数的实现方式是不是很巧妙呢？这也是为什么这种排序算法叫计数排序的原因。不过，<strong>你千万不要死记硬背上面的排序过程，重要的是理解和会用</strong>。</p>
+<p>我总结一下，<strong>计数排序只能用在数据范围不大的场景中，如果数据范围 k 比要排序的数据 n 大很多，就不适合用计数排序了。而且，计数排序只能给非负整数排序，如果要排序的数据是其他类型的，要将其在不改变相对大小的情况下，转化为非负整数</strong>。</p>
+<p>比如，还是拿考生这个例子。如果考生成绩精确到小数后一位，我们就需要将所有的分数都先乘以 10，转化成整数，然后再放到 9010 个桶内。再比如，如果要排序的数据中有负数，数据的范围是 [-1000, 1000]，那我们就需要先对每个数据都加 1000，转化成非负整数。</p>
+<h2 id="基数排序（Radix-sort）"><a href="#基数排序（Radix-sort）" class="headerlink" title="基数排序（Radix sort）"></a>基数排序（Radix sort）</h2><p>我们再来看这样一个排序问题。假设我们有 10 万个手机号码，希望将这 10 万个手机号码从小到大排序，你有什么比较快速的排序方法呢？</p>
+<p>我们之前讲的快排，时间复杂度可以做到 $O(n log n)$，还有更高效的排序算法吗？桶排序、计数排序能派上用场吗？手机号码有 11 位，范围太大，显然不适合用这两种排序算法。针对这个排序问题，有没有时间复杂度是 O(n) 的算法呢？现在我就来介绍一种新的排序算法，基数排序。</p>
+<p>刚刚这个问题里有这样的规律：假设要比较两个手机号码 a，b 的大小，如果在前面几位中，a 手机号码已经比 b 手机号码大了，那后面的几位就不用看了。</p>
+<p>借助稳定排序算法，这里有一个巧妙的实现思路。还记得我们第 11 节中，在阐述排序算法的稳定性的时候举的订单的例子吗？我们这里也可以借助相同的处理思路，先按照最后一位来排序手机号码，然后，再按照倒数第二位重新排序，以此类推，最后按照第一位重新排序。经过 11 次排序之后，手机号码就都有序了。</p>
+<p>手机号码稍微有点长，画图比较不容易看清楚，我用字符串排序的例子，画了一张基数排序的过程分解图，你可以看下。<img src="/dev/2018/10/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%A0%B9%E6%8D%AE%E5%B9%B4%E9%BE%84%E7%BB%99100%E4%B8%87%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8E%92%E5%BA%8F/5.jpg" class="" title="图5">注意，这里按照每位来排序的排序算法要是稳定的，否则这个实现思路就是不正确的。因为如果是非稳定排序算法，那最后一次排序只会考虑最高位的大小顺序，完全不管其他位的大小关系，那么低位的排序就完全没有意义了。</p>
+<p>根据每一位来排序，我们可以用刚讲过的桶排序或者计数排序，它们的时间复杂度可以做到 O(n)。如果要排序的数据有 k 位，那我们就需要 k 次桶排序或者计数排序，总的时间复杂度是 O(k*n)。当 k 不大的时候，比如手机号码排序的例子，k 最大就是 11，所以基数排序的时间复杂度就近似于 O(n)。</p>
+<p>实际上，有时候要排序的数据并不都是等长的，比如我们排序牛津字典中的 20 万个英文单词，最短的只有 1 个字母，最长的我特意去查了下，有 45 个字母，中文翻译是尘肺病。对于这种不等长的数据，基数排序还适用吗？</p>
+<p>实际上，<strong>我们可以把所有的单词补齐到相同长度，位数不够的可以在后面补“0”</strong>，因为根据ASCII 值，所有字母都大于“0”，所以补“0”不会影响到原有的大小顺序。这样就可以继续用基数排序了。</p>
+<p>我来总结一下，<strong>基数排序对要排序的数据是有要求的，需要可以分割出独立的“位”来比较，而且位之间有递进的关系，如果 a 数据的高位比 b 数据大，那剩下的低位就不用比较了。除此之外，每一位的数据范围不能太大，要可以用线性排序算法来排序，否则，基数排序的时间复杂度就无法做到 O(n) 了</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span>:基数排序</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RadixSort</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 基数排序</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">radixSort</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> max = arr[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[i] &gt; max) &#123;</span><br><span class="line">                max = arr[i];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 从个位开始，对数组arr按"指数"进行排序</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> exp = <span class="number">1</span>; max / exp &gt; <span class="number">0</span>; exp *= <span class="number">10</span>) &#123;</span><br><span class="line">            countingSort(arr, exp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 计数排序-对数组按照"某个位数"进行排序</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> exp 指数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">countingSort</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> exp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (arr.length &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 计算每个元素的个数</span></span><br><span class="line">        <span class="keyword">int</span>[] c = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">            c[(arr[i] / exp) % <span class="number">10</span>]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 计算排序后的位置</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; c.length; i++) &#123;</span><br><span class="line">            c[i] += c[i - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 临时数组r，存储排序之后的结果</span></span><br><span class="line">        <span class="keyword">int</span>[] r = <span class="keyword">new</span> <span class="keyword">int</span>[arr.length];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = arr.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            r[c[(arr[i] / exp) % <span class="number">10</span>] - <span class="number">1</span>] = arr[i];</span><br><span class="line">            c[(arr[i] / exp) % <span class="number">10</span>]--;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">            arr[i] = r[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>解答开篇</p>
+<p>今天的内容学完了。我们再回过头来看看开篇的思考题：如何根据年龄给 100 万用户排序？现在思考题是不是变得非常简单了呢？我来说一下我的解决思路。</p>
+<p>实际上，根据年龄给 100 万用户排序，就类似按照成绩给 50 万考生排序。我们假设年龄的范围最小 1 岁，最大不超过 120 岁。我们可以遍历这 100 万用户，根据年龄将其划分到这 120 个桶里，然后依次顺序遍历这 120 个桶中的元素。这样就得到了按照年龄排序的 100 万用户数据。</p>
+<p>内容小结</p>
+<p>今天，我们学习了 3 种线性时间复杂度的排序算法，有桶排序、计数排序、基数排序。它们对要排序的数据都有比较苛刻的要求，应用不是非常广泛。但是如果数据特征比较符合这些排序算法的要求，应用这些算法，会非常高效，线性时间复杂度可以达到 O(n)。</p>
+<p>桶排序和计数排序的排序思想是非常相似的，都是针对范围不大的数据，将数据划分成不同的桶来实现排序。基数排序要求数据可以划分成高低位，位之间有递进关系。比较两个数，我们只需要比较高位，高位相同的再比较低位。而且每一位的数据范围不能太大，因为基数排序算法需要借助桶排序或者计数排序来完成每一个位的排序工作。</p>
+<p>课后思考</p>
+<p>我们今天讲的都是针对特殊数据的排序算法。实际上，还有很多看似是排序但又不需要使用排序算法就能处理的排序问题。</p>
+<p>假设我们现在需要对 D，a，F，B，c，A，z 这个字符串进行排序，要求将其中所有小写字母都排在大写字母的前面，但小写字母内部和大写字母内部不要求有序。比如经过排序之后为 a，c，z，D，F，B，A，这个如何来实现呢？如果字符串中存储的不仅有大小写字母，还有数字。要将小写字母的放到前面，大写字母放在最后，数字放在中间，不用排序算法，又该怎么解决呢？</p>
+<blockquote>
+<p>参考极客时间《数据结构与算法之美》专栏</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%8E%92%E5%BA%8F/" rel="tag"><i class="fa fa-tag"></i> 排序</a>
+              <a href="/dev/tags/%E6%A1%B6%E6%8E%92%E5%BA%8F/" rel="tag"><i class="fa fa-tag"></i> 桶排序</a>
+              <a href="/dev/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/" rel="tag"><i class="fa fa-tag"></i> 计数排序</a>
+              <a href="/dev/tags/%E5%9F%BA%E6%95%B0%E6%8E%92%E5%BA%8F/" rel="tag"><i class="fa fa-tag"></i> 基数排序</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2018/10/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E7%94%A8%E5%BF%AB%E6%8E%92%E6%80%9D%E6%83%B3%E5%9C%A8On%E5%86%85%E6%9F%A5%E6%89%BE%E7%AC%ACK%E5%A4%A7%E5%85%83%E7%B4%A0/" rel="prev" title="排序（下）：如何用快排思想在On内查找第K大元素">
+      <i class="fa fa-chevron-left"></i> 排序（下）：如何用快排思想在On内查找第K大元素
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2018/10/22/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E4%BC%98%E5%8C%96%EF%BC%9A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%80%9A%E7%94%A8%E7%9A%84%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E6%8E%92%E5%BA%8F%E5%87%BD%E6%95%B0/" rel="next" title="排序优化：如何实现一个通用的、高性能的排序函数">
+      排序优化：如何实现一个通用的、高性能的排序函数 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#桶排序（Bucket-sort）"><span class="nav-number">1.</span> <span class="nav-text">桶排序（Bucket sort）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计数排序（Counting-sort）"><span class="nav-number">2.</span> <span class="nav-text">计数排序（Counting sort）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基数排序（Radix-sort）"><span class="nav-number">3.</span> <span class="nav-text">基数排序（Radix sort）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

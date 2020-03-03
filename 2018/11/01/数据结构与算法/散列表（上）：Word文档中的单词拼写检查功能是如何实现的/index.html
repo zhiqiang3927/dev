@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Word 这种文本编辑器你平时应该经常用吧，那你有没有留意过它的拼写检查功能呢？一旦我们在 Word 里输入一个错误的英文单词，它就会用标红的方式提示“拼写错误”。Word 的这个单词拼写检查功能，虽然很小但却非常实用。你有没有想过，这个功能是如何实现的呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="散列表（上）：Word文档中的单词拼写检查功能是如何实现的">
+<meta property="og:url" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="Word 这种文本编辑器你平时应该经常用吧，那你有没有留意过它的拼写检查功能呢？一旦我们在 Word 里输入一个错误的英文单词，它就会用标红的方式提示“拼写错误”。Word 的这个单词拼写检查功能，虽然很小但却非常实用。你有没有想过，这个功能是如何实现的呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/1.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/2.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/3.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/4.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/5.jpg">
+<meta property="article:published_time" content="2018-11-01T04:43:24.000Z">
+<meta property="article:modified_time" content="2020-03-03T05:42:35.045Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="散列表">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/1.jpg">
+
+<link rel="canonical" href="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>散列表（上）：Word文档中的单词拼写检查功能是如何实现的 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">64</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          散列表（上）：Word文档中的单词拼写检查功能是如何实现的
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2018-11-01 12:43:24" itemprop="dateCreated datePublished" datetime="2018-11-01T12:43:24+08:00">2018-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Word 这种文本编辑器你平时应该经常用吧，那你有没有留意过它的拼写检查功能呢？一旦我们在 Word 里输入一个错误的英文单词，它就会用标红的方式提示“拼写错误”。Word 的这个单词拼写检查功能，虽然很小但却非常实用。你有没有想过，这个功能是如何实现的呢？<a id="more"></a></p>
+<p>其实啊，一点儿都不难。只要你学完今天的内容，<strong>散列表</strong>（Hash Table）。你就能像微软 Office 的工程师一样，轻松实现这个功能。</p>
+<h2 id="散列思想"><a href="#散列思想" class="headerlink" title="散列思想"></a>散列思想</h2><p>散列表的英文叫“Hash Table”，我们平时也叫它“哈希表”或者“Hash 表”，你一定也经常听过它，我在前面的文章里，也不止一次提到过，但是你是不是真的理解这种数据结构呢？</p>
+<p><strong>散列表用的是数组支持按照下标随机访问数据的特性，所以散列表其实就是数组的一种扩展，由数组演化而来。可以说，如果没有数组，就没有散列表</strong>。</p>
+<p>我用一个例子来解释一下。假如我们有 89 名选手参加学校运动会。为了方便记录成绩，每个选手胸前都会贴上自己的参赛号码。这 89 名选手的编号依次是 1 到 89。现在我们希望编程实现这样一个功能，通过编号快速找到对应的选手信息。你会怎么做呢？</p>
+<p>我们可以把这 89 名选手的信息放在数组里。编号为 1 的选手，我们放到数组中下标为 1 的位置；编号为 2 的选手，我们放到数组中下标为 2 的位置。以此类推，编号为 k 的选手放到数组中下标为 k 的位置。</p>
+<p>因为参赛编号跟数组下标一一对应，当我们需要查询参赛编号为 x 的选手的时候，我们只需要将下标为 x 的数组元素取出来就可以了，时间复杂度就是 O(1)。这样按照编号查找选手信息，效率是不是很高？</p>
+<p>实际上，这个例子已经用到了散列的思想。在这个例子里，参赛编号是自然数，并且与数组的下标形成一一映射，所以利用数组支持根据下标随机访问的时候，时间复杂度是 O(1) 这一特性，就可以实现快速查找编号对应的选手信息。</p>
+<p>你可能要说了，这个例子中蕴含的散列思想还不够明显，那我来改造一下这个例子。</p>
+<p>假设校长说，参赛编号不能设置得这么简单，要加上年级、班级这些更详细的信息，所以我们把编号的规则稍微修改了一下，用 6 位数字来表示。比如 051167，其中，前两位 05 表示年级，中间两位 11 表示班级，最后两位还是原来的编号 1 到 89。这个时候我们该如何存储选手信息，才能够支持通过编号来快速查找选手信息呢？</p>
+<p>思路还是跟前面类似。尽管我们不能直接把编号作为数组下标，但我们可以截取参赛编号的后两位作为数组下标，来存取选手信息数据。当通过参赛编号查询选手信息的时候，我们用同样的方法，取参赛编号的后两位，作为数组下标，来读取数组中的数据。</p>
+<p>这就是典型的散列思想。其中，参赛选手的编号我们叫作<strong>键</strong>（key）或者<strong>关键字</strong>。我们用它来标识一个选手。我们把参赛编号转化为数组下标的映射方法就叫作<strong>散列函数</strong>（或“Hash 函数”“哈希函数”），而散列函数计算得到的值就叫作<strong>散列值</strong>（或“Hash 值”“哈希值”）。<img src="/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/1.jpg" class="" title="图1">通过这个例子，我们可以总结出这样的规律：散列表用的就是数组支持按照下标随机访问的时候，时间复杂度是 O(1) 的特性。我们通过散列函数把元素的键值映射为下标，然后将数据存储在数组中对应下标的位置。当我们按照键值查询元素时，我们用同样的散列函数，将键值转化数组下标，从对应的数组下标的位置取数据。</p>
+<h2 id="散列函数"><a href="#散列函数" class="headerlink" title="散列函数"></a>散列函数</h2><p>从上面的例子我们可以看到，散列函数在散列表中起着非常关键的作用。现在我们就来学习下散列函数。</p>
+<p>散列函数，顾名思义，它是一个函数。我们可以把它定义成<strong>hash(key)</strong>，其中 key 表示元素的键值，hash(key) 的值表示经过散列函数计算得到的散列值。</p>
+<p>那第一个例子中，编号就是数组下标，所以 hash(key) 就等于 key。改造后的例子，写成散列函数稍微有点复杂。我用伪代码将它写成函数就是下面这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">hash</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 获取后两位字符</span></span><br><span class="line">  string lastTwoChars = key.substr(length-<span class="number">2</span>, length);</span><br><span class="line">  <span class="comment">// 将后两位字符转换为整数</span></span><br><span class="line">  <span class="keyword">int</span> hashValue = convert lastTwoChas to <span class="keyword">int</span>-type;</span><br><span class="line">  <span class="keyword">return</span> hashValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>刚刚举的学校运动会的例子，散列函数比较简单，也比较容易想到。但是，如果参赛选手的编号是随机生成的 6 位数字，又或者用的是 a 到 z 之间的字符串，<strong>该如何构造散列函数呢？我总结了三点散列函数设计的基本要求</strong>：</p>
+<ul>
+<li>散列函数计算得到的散列值是一个非负整数；</li>
+<li>如果 key1 = key2，那 hash(key1) == hash(key2)；</li>
+<li>如果 key1 ≠ key2，那 hash(key1) ≠ hash(key2)。</li>
+</ul>
+<p>我来解释一下这三点。其中，第一点理解起来应该没有任何问题。因为数组下标是从 0 开始的，所以散列函数生成的散列值也要是非负整数。第二点也很好理解。相同的 key，经过散列函数得到的散列值也应该是相同的。</p>
+<p>第三点理解起来可能会有问题，我着重说一下。这个要求看起来合情合理，但是在真实的情况下，要想找到一个不同的 key 对应的散列值都不一样的散列函数，几乎是不可能的。即便像业界著名的<a href="https://zh.wikipedia.org/wiki/MD5" target="_blank" rel="noopener">MD5</a>、<a href="https://zh.wikipedia.org/wiki/SHA" target="_blank" rel="noopener">SHA</a>、<a href="https://zh.wikipedia.org/wiki/CRC" target="_blank" rel="noopener">CRC</a>等哈希算法，也无法完全避免这种<strong>散列冲突</strong>。而且，因为数组的存储空间有限，也会加大散列冲突的概率。</p>
+<p>所以我们几乎无法找到一个完美的无冲突的散列函数，即便能找到，付出的时间成本、计算成本也是很大的，所以针对散列冲突问题，我们需要通过其他途径来解决。</p>
+<h2 id="散列冲突"><a href="#散列冲突" class="headerlink" title="散列冲突"></a>散列冲突</h2><p>再好的散列函数也无法避免散列冲突。那究竟该如何解决散列冲突问题呢？我们常用的散列冲突解决方法有两类，开放寻址法（open addressing）和链表法（chaining）。</p>
+<h3 id="开放寻址法"><a href="#开放寻址法" class="headerlink" title="开放寻址法"></a>开放寻址法</h3><p>开放寻址法的核心思想是，如果出现了散列冲突，我们就重新探测一个空闲位置，将其插入。那如何重新探测新的位置呢？我先讲一个比较简单的探测方法，<strong>线性探测</strong>（Linear Probing）。</p>
+<p>当我们往散列表中插入数据时，如果某个数据经过散列函数散列之后，存储位置已经被占用了，我们就从当前位置开始，依次往后查找，看是否有空闲位置，直到找到为止。</p>
+<p>我说的可能比较抽象，我举一个例子具体给你说明一下。这里面黄色的色块表示空闲位置，橙色的色块表示已经存储了数据。<img src="/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/2.jpg" class="" title="图2">从图中可以看出，散列表的大小为 10，在元素 x 插入散列表之前，已经 6 个元素插入到散列表中。x 经过 Hash 算法之后，被散列到位置下标为 7 的位置，但是这个位置已经有数据了，所以就产生了冲突。于是我们就顺序地往后一个一个找，看有没有空闲的位置，遍历到尾部都没有找到空闲的位置，于是我们再从表头开始找，直到找到空闲位置 2，于是将其插入到这个位置。</p>
+<p>在散列表中查找元素的过程有点儿类似插入过程。我们通过散列函数求出要查找元素的键值对应的散列值，然后比较数组中下标为散列值的元素和要查找的元素。如果相等，则说明就是我们要找的元素；否则就顺序往后依次查找。如果遍历到数组中的空闲位置，还没有找到，就说明要查找的元素并没有在散列表中。<img src="/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/3.jpg" class="" title="图3">散列表跟数组一样，不仅支持插入、查找操作，还支持删除操作。对于使用线性探测法解决冲突的散列表，删除操作稍微有些特别。我们不能单纯地把要删除的元素设置为空。这是为什么呢？</p>
+<p>还记得我们刚讲的查找操作吗？在查找的时候，一旦我们通过线性探测方法，找到一个空闲位置，我们就可以认定散列表中不存在这个数据。但是，如果这个空闲位置是我们后来删除的，就会导致原来的查找算法失效。本来存在的数据，会被认定为不存在。这个问题如何解决呢？</p>
+<p>我们可以将删除的元素，特殊标记为 deleted。当线性探测查找的时候，遇到标记为 deleted 的空间，并不是停下来，而是继续往下探测。<img src="/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/4.jpg" class="" title="图4">你可能已经发现了，线性探测法其实存在很大问题。当散列表中插入的数据越来越多时，散列冲突发生的可能性就会越来越大，空闲位置会越来越少，线性探测的时间就会越来越久。极端情况下，我们可能需要探测整个散列表，所以最坏情况下的时间复杂度为 O(n)。同理，在删除和查找时，也有可能会线性探测整张散列表，才能找到要查找或者删除的数据。</p>
+<p>对于开放寻址冲突解决方法，除了线性探测方法之外，还有另外两种比较经典的探测方法，<strong>二次探测</strong>（Quadratic probing）和<strong>双重散列</strong>（Double hashing）。</p>
+<p>所谓二次探测，跟线性探测很像，线性探测每次探测的步长是 1，那它探测的下标序列就是 hash(key)+0，hash(key)+1，hash(key)+2……而二次探测探测的步长就变成了原来的“二次方”，也就是说，它探测的下标序列就是 $hash(key)+0，hash(key)+1^2，hash(key)+2^2……$</p>
+<p>所谓双重散列，意思就是不仅要使用一个散列函数。我们使用一组散列函数 hash1(key)，hash2(key)，hash3(key)……我们先用第一个散列函数，如果计算得到的存储位置已经被占用，再用第二个散列函数，依次类推，直到找到空闲的存储位置。</p>
+<p>不管采用哪种探测方法，当散列表中空闲位置不多的时候，散列冲突的概率就会大大提高。为了尽可能保证散列表的操作效率，一般情况下，我们会尽可能保证散列表中有一定比例的空闲槽位。我们用<strong>装载因子</strong>（load factor）来表示空位的多少。</p>
+<p>装载因子的计算公式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">散列表的装载因子 &#x3D; 填入表中的元素个数 &#x2F; 散列表的长度</span><br></pre></td></tr></table></figure>
+<p>装载因子越大，说明空闲位置越少，冲突越多，散列表的性能会下降。</p>
+<h3 id="链表法"><a href="#链表法" class="headerlink" title="链表法"></a>链表法</h3><p>链表法是一种更加常用的散列冲突解决办法，相比开放寻址法，它要简单很多。我们来看这个图，在散列表中，每个“桶（bucket）”或者“槽（slot）”会对应一条链表，所有散列值相同的元素我们都放到相同槽位对应的链表中。<img src="/dev/2018/11/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9AWord%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E5%8D%95%E8%AF%8D%E6%8B%BC%E5%86%99%E6%A3%80%E6%9F%A5%E5%8A%9F%E8%83%BD%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9A%84/5.jpg" class="" title="图5">当插入的时候，我们只需要通过散列函数计算出对应的散列槽位，将其插入到对应链表中即可，所以插入的时间复杂度是 O(1)。当查找、删除一个元素时，我们同样通过散列函数计算出对应的槽，然后遍历链表查找或者删除。那查找或删除操作的时间复杂度是多少呢？</p>
+<p>实际上，这两个操作的时间复杂度跟链表的长度 k 成正比，也就是 O(k)。对于散列比较均匀的散列函数来说，理论上讲，k=n/m，其中 n 表示散列中数据的个数，m 表示散列表中“槽”的个数。</p>
+<h2 id="解答开篇"><a href="#解答开篇" class="headerlink" title="解答开篇"></a>解答开篇</h2><p>有了前面这些基本知识储备，我们来看一下开篇的思考题：Word 文档中单词拼写检查功能是如何实现的？</p>
+<p>常用的英文单词有 20 万个左右，假设单词的平均长度是 10 个字母，平均一个单词占用 10 个字节的内存空间，那 20 万英文单词大约占 2MB 的存储空间，就算放大 10 倍也就是 20MB。对于现在的计算机来说，这个大小完全可以放在内存里面。所以我们可以用散列表来存储整个英文单词词典。</p>
+<p>当用户输入某个英文单词时，我们拿用户输入的单词去散列表中查找。如果查到，则说明拼写正确；如果没有查到，则说明拼写可能有误，给予提示。借助散列表这种数据结构，我们就可以轻松实现快速判断是否存在拼写错误。</p>
+<h2 id="内容小结"><a href="#内容小结" class="headerlink" title="内容小结"></a>内容小结</h2><p>今天我讲了一些比较基础、比较偏理论的散列表知识，包括散列表的由来、散列函数、散列冲突的解决方法。</p>
+<p>散列表来源于数组，它借助散列函数对数组这种数据结构进行扩展，利用的是数组支持按照下标随机访问元素的特性。散列表两个核心问题是<strong>散列函数设计</strong>和<strong>散列冲突解决</strong>。散列冲突有两种常用的解决方法，开放寻址法和链表法。散列函数设计的好坏决定了散列冲突的概率，也就决定散列表的性能。</p>
+<p>针对散列函数和散列冲突，今天我只讲了一些基础的概念、方法，下一节我会更贴近实战、更加深入探讨这两个问题。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span>:散列表实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HashTable</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 散列表默认长度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITAL_CAPACITY = <span class="number">8</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 装载因子</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> LOAD_FACTOR = <span class="number">0.75f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始化散列表数组</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Entry&lt;K, V&gt;[] table;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实际元素数量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 散列表索引数量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> use = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HashTable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        table = (Entry&lt;K, V&gt;[]) <span class="keyword">new</span> Entry[DEFAULT_INITAL_CAPACITY];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">        K key;</span><br><span class="line"></span><br><span class="line">        V value;</span><br><span class="line"></span><br><span class="line">        Entry&lt;K, V&gt; next;</span><br><span class="line"></span><br><span class="line">        Entry(K key, V value, Entry&lt;K, V&gt; next) &#123;</span><br><span class="line">            <span class="keyword">this</span>.key = key;</span><br><span class="line">            <span class="keyword">this</span>.value = value;</span><br><span class="line">            <span class="keyword">this</span>.next = next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 新增</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> index = hash(key);</span><br><span class="line">        <span class="comment">// 位置未被引用，创建哨兵节点</span></span><br><span class="line">        <span class="keyword">if</span> (table[index] == <span class="keyword">null</span>) &#123;</span><br><span class="line">            table[index] = <span class="keyword">new</span> Entry&lt;&gt;(<span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Entry&lt;K, V&gt; tmp = table[index];</span><br><span class="line">        <span class="comment">// 新增节点</span></span><br><span class="line">        <span class="keyword">if</span> (tmp.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">            tmp.next = <span class="keyword">new</span> Entry&lt;&gt;(key, value, <span class="keyword">null</span>);</span><br><span class="line">            size++;</span><br><span class="line">            use++;</span><br><span class="line">            <span class="comment">// 动态扩容</span></span><br><span class="line">            <span class="keyword">if</span> (use &gt;= table.length * LOAD_FACTOR) &#123;</span><br><span class="line">                resize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 解决散列冲突，使用链表法</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                tmp = tmp.next;</span><br><span class="line">                <span class="comment">// key相同，覆盖旧的数据</span></span><br><span class="line">                <span class="keyword">if</span> (tmp.key == key) &#123;</span><br><span class="line">                    tmp.value = value;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">while</span> (tmp.next != <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">            Entry&lt;K, V&gt; temp = table[index].next;</span><br><span class="line">            table[index].next = <span class="keyword">new</span> Entry&lt;&gt;(key, value, temp);</span><br><span class="line">            size++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 散列函数</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;</span></span><br><span class="line"><span class="comment">     * 参考hashmap散列函数</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> h;</span><br><span class="line">        <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : ((h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>)) % table.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 扩容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">resize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Entry&lt;K, V&gt;[] oldTable = table;</span><br><span class="line">        table = (Entry&lt;K, V&gt;[]) <span class="keyword">new</span> Entry[table.length * <span class="number">2</span>];</span><br><span class="line">        use = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; oldTable.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (oldTable[i] == <span class="keyword">null</span> || oldTable[i].next == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            Entry&lt;K, V&gt; e = oldTable[i];</span><br><span class="line">            <span class="keyword">while</span> (e.next != <span class="keyword">null</span>) &#123;</span><br><span class="line">                e = e.next;</span><br><span class="line">                <span class="keyword">int</span> index = hash(e.key);</span><br><span class="line">                <span class="keyword">if</span> (table[index] == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    use++;</span><br><span class="line">                    <span class="comment">// 创建哨兵节点</span></span><br><span class="line">                    table[index] = <span class="keyword">new</span> Entry&lt;&gt;(<span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                table[index].next = <span class="keyword">new</span> Entry&lt;&gt;(e.key, e.value, table[index].next);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> index = hash(key);</span><br><span class="line">        Entry e = table[index];</span><br><span class="line">        <span class="keyword">if</span> (e == <span class="keyword">null</span> || e.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Entry pre;</span><br><span class="line">        Entry&lt;K, V&gt; headNode = table[index];</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            pre = e;</span><br><span class="line">            e = e.next;</span><br><span class="line">            <span class="keyword">if</span> (key == e.key) &#123;</span><br><span class="line">                pre.next = e.next;</span><br><span class="line">                size--;</span><br><span class="line">                <span class="keyword">if</span> (headNode.next == <span class="keyword">null</span>) use--;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">while</span> (e.next != <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> index = hash(key);</span><br><span class="line">        Entry&lt;K, V&gt; e = table[index];</span><br><span class="line">        <span class="keyword">if</span> (e == <span class="keyword">null</span> || e.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (e.next != <span class="keyword">null</span>) &#123;</span><br><span class="line">            e = e.next;</span><br><span class="line">            <span class="keyword">if</span> (key == e.key) &#123;</span><br><span class="line">                <span class="keyword">return</span> e.value;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>参考极客时间《数据结构与算法之美》专栏</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%95%A3%E5%88%97%E8%A1%A8/" rel="tag"><i class="fa fa-tag"></i> 散列表</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2018/10/30/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E8%B7%B3%E8%A1%A8%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88Redis%E4%B8%80%E5%AE%9A%E8%A6%81%E7%94%A8%E8%B7%B3%E8%A1%A8%E6%9D%A5%E5%AE%9E%E7%8E%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/" rel="prev" title="跳表：为什么Redis一定要用跳表来实现有序集合">
+      <i class="fa fa-chevron-left"></i> 跳表：为什么Redis一定要用跳表来实现有序集合
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2018/11/03/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%AD%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E5%B7%A5%E4%B8%9A%E7%BA%A7%E6%B0%B4%E5%B9%B3%E7%9A%84%E6%95%A3%E5%88%97%E8%A1%A8/" rel="next" title="散列表（中）：如何打造一个工业级水平的散列表">
+      散列表（中）：如何打造一个工业级水平的散列表 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#散列思想"><span class="nav-number">1.</span> <span class="nav-text">散列思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#散列函数"><span class="nav-number">2.</span> <span class="nav-text">散列函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#散列冲突"><span class="nav-number">3.</span> <span class="nav-text">散列冲突</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#开放寻址法"><span class="nav-number">3.1.</span> <span class="nav-text">开放寻址法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链表法"><span class="nav-number">3.2.</span> <span class="nav-text">链表法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解答开篇"><span class="nav-number">4.</span> <span class="nav-text">解答开篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内容小结"><span class="nav-number">5.</span> <span class="nav-text">内容小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码实现"><span class="nav-number">6.</span> <span class="nav-text">代码实现</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

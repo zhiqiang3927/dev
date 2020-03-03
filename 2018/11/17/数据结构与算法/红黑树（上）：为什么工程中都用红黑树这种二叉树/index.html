@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="很多书籍里，但凡讲到平衡二叉查找树，就会拿红黑树作为例子。不仅如此，如果你有一定的开发经验，你会发现，在工程中，很多用到平衡二叉查找树的地方都会用红黑树。你有没有想过，为什么工程中都喜欢用红黑树，而不是其他平衡二叉查找树呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红黑树（上）：为什么工程中都用红黑树这种二叉树">
+<meta property="og:url" content="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="很多书籍里，但凡讲到平衡二叉查找树，就会拿红黑树作为例子。不仅如此，如果你有一定的开发经验，你会发现，在工程中，很多用到平衡二叉查找树的地方都会用红黑树。你有没有想过，为什么工程中都喜欢用红黑树，而不是其他平衡二叉查找树呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/1.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/2.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/3.jpg">
+<meta property="article:published_time" content="2018-11-17T08:39:17.000Z">
+<meta property="article:modified_time" content="2020-03-03T09:41:29.578Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="树">
+<meta property="article:tag" content="红黑树">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/1.jpg">
+
+<link rel="canonical" href="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>红黑树（上）：为什么工程中都用红黑树这种二叉树 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">64</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          红黑树（上）：为什么工程中都用红黑树这种二叉树
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2018-11-17 16:39:17" itemprop="dateCreated datePublished" datetime="2018-11-17T16:39:17+08:00">2018-11-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>很多书籍里，但凡讲到平衡二叉查找树，就会拿红黑树作为例子。不仅如此，如果你有一定的开发经验，你会发现，在工程中，很多用到平衡二叉查找树的地方都会用红黑树。你有没有想过，为什么工程中都喜欢用红黑树，而不是其他平衡二叉查找树呢？<br><a id="more"></a><br>带着这个问题，让我们一起来学习今天的内容吧！</p>
+<p>上两节，我们依次讲了树、二叉树、二叉查找树。二叉查找树是最常用的一种二叉树，它支持快速插入、删除、查找操作，各个操作的时间复杂度跟树的高度成正比，理想情况下，时间复杂度是 O(logn)。</p>
+<p>不过，二叉查找树在频繁的动态更新过程中，可能会出现树的高度远大于 $log_2n$ 的情况，从而导致各个操作的效率下降。极端情况下，二叉树会退化为链表，时间复杂度会退化到 O(n)。我上一节说了，要解决这个复杂度退化的问题，我们需要设计一种平衡二叉查找树，也就是今天要讲的这种数据结构。</p>
+<h2 id="什么是“平衡二叉查找树”"><a href="#什么是“平衡二叉查找树”" class="headerlink" title="什么是“平衡二叉查找树”"></a>什么是“平衡二叉查找树”</h2><p>平衡二叉树的严格定义是这样的：二叉树中任意一个节点的左右子树的高度相差不能大于 1。从这个定义来看，上一节我们讲的完全二叉树、满二叉树其实都是平衡二叉树，但是非完全二叉树也有可能是平衡二叉树。<img src="/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/1.jpg" class="" title="图1">平衡二叉查找树不仅满足上面平衡二叉树的定义，还满足二叉查找树的特点。最先被发明的平衡二叉查找树是<a href="https://zh.wikipedia.org/wiki/AVL%E6%A0%91" target="_blank" rel="noopener">AVL 树</a>，它严格符合我刚讲到的平衡二叉查找树的定义，即任何节点的左右子树高度相差不超过 1，是一种高度平衡的二叉查找树。</p>
+<p>但是很多平衡二叉查找树其实并没有严格符合上面的定义（树中任意一个节点的左右子树的高度相差不能大于 1），比如我们下面要讲的红黑树，它从根节点到各个叶子节点的最长路径，有可能会比最短路径大一倍。</p>
+<p>我们学习数据结构和算法是为了应用到实际的开发中的，所以，我觉得没必去死抠定义。对于平衡二叉查找树这个概念，我觉得我们要从这个数据结构的由来，去理解“平衡”的意思。</p>
+<p>发明平衡二叉查找树这类数据结构的初衷是，解决普通二叉查找树在频繁的插入、删除等动态更新的情况下，出现时间复杂度退化的问题。</p>
+<p>所以，<strong>平衡二叉查找树中“平衡”的意思，其实就是让整棵树左右看起来比较“对称”、比较“平衡”，不要出现左子树很高、右子树很矮的情况。这样就能让整棵树的高度相对来说低一些，相应的插入、删除、查找等操作的效率高一些</strong>。</p>
+<p>所以，如果我们现在设计一个新的平衡二叉查找树，只要树的高度不比 $log_2n$ 大很多（比如树的高度仍然是对数量级的），尽管它不符合我们前面讲的严格的平衡二叉查找树的定义，但我们仍然可以说，这是一个合格的平衡二叉查找树。</p>
+<h2 id="如何定义一棵“红黑树”"><a href="#如何定义一棵“红黑树”" class="headerlink" title="如何定义一棵“红黑树”"></a>如何定义一棵“红黑树”</h2><p>平衡二叉查找树其实有很多，比如，Splay Tree（伸展树）、Treap（树堆）等，但是我们提到平衡二叉查找树，听到的基本都是红黑树。它的出镜率甚至要高于“平衡二叉查找树”这几个字，有时候，我们甚至默认平衡二叉查找树就是红黑树，那我们现在就来看看这个“明星树”。</p>
+<p>红黑树的英文是“Red-Black Tree”，简称 R-B Tree。它是一种不严格的平衡二叉查找树，我前面说了，它的定义是不严格符合平衡二叉查找树的定义的。那红黑树究竟是怎么定义的呢？</p>
+<p>顾名思义，红黑树中的节点，一类被标记为黑色，一类被标记为红色。除此之外，一棵红黑树还需要满足这样几个要求：</p>
+<ul>
+<li>根节点是黑色的；</li>
+<li>每个叶子节点都是黑色的空节点（NIL），也就是说，叶子节点不存储数据；</li>
+<li>任何相邻的节点都不能同时为红色，也就是说，红色节点是被黑色节点隔开的；</li>
+<li>每个节点，从该节点到达其可达叶子节点的所有路径，都包含相同数目的黑色节点；</li>
+</ul>
+<p>这里的第二点要求“叶子节点都是黑色的空节点”，稍微有些奇怪，它主要是为了简化红黑树的代码实现而设置的，下一节我们讲红黑树的实现的时候会讲到。<strong>这节我们暂时不考虑这一点，所以，在画图和讲解的时候，我将黑色的、空的叶子节点都省略掉了</strong>。</p>
+<p>为了让你更好地理解上面的定义，我画了两个红黑树的图例，你可以对照着看下。<img src="/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/2.jpg" class="" title="图2"></p>
+<h2 id="为什么说红黑树是“近似平衡”的"><a href="#为什么说红黑树是“近似平衡”的" class="headerlink" title="为什么说红黑树是“近似平衡”的"></a>为什么说红黑树是“近似平衡”的</h2><p>我们前面也讲到，平衡二叉查找树的初衷，是为了解决二叉查找树因为动态更新导致的性能退化问题。所以，<strong>“平衡”的意思可以等价为性能不退化。“近似平衡”就等价为性能不会退化的太严重</strong>。</p>
+<p>我们在上一节讲过，二叉查找树很多操作的性能都跟树的高度成正比。一棵极其平衡的二叉树（满二叉树或完全二叉树）的高度大约是 $log_2n$，所以如果要证明红黑树是近似平衡的，我们只需要分析，红黑树的高度是否比较稳定地趋近 $log_2n$ 就好了。</p>
+<p>红黑树的高度不是很好分析，我带你一步一步来推导。</p>
+<p><strong>首先，我们来看，如果我们将红色节点从红黑树中去掉，那单纯包含黑色节点的红黑树的高度是多少呢？</strong></p>
+<p>红色节点删除之后，有些节点就没有父节点了，它们会直接拿这些节点的祖父节点（父节点的父节点）作为父节点。所以，之前的二叉树就变成了四叉树。<img src="/dev/2018/11/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B7%A5%E7%A8%8B%E4%B8%AD%E9%83%BD%E7%94%A8%E7%BA%A2%E9%BB%91%E6%A0%91%E8%BF%99%E7%A7%8D%E4%BA%8C%E5%8F%89%E6%A0%91/3.jpg" class="" title="图3">前面红黑树的定义里有这么一条：从任意节点到可达的叶子节点的每个路径包含相同数目的黑色节点。我们从四叉树中取出某些节点，放到叶节点位置，四叉树就变成了完全二叉树。所以，仅包含黑色节点的四叉树的高度，比包含相同节点个数的完全二叉树的高度还要小。</p>
+<p>上一节我们说，完全二叉树的高度近似 $log_2n$，这里的四叉“黑树”的高度要低于完全二叉树，所以去掉红色节点的“黑树”的高度也不会超过 $log_2n$。</p>
+<p><strong>我们现在知道只包含黑色节点的“黑树”的高度，那我们现在把红色节点加回去，高度会变成多少呢？</strong></p>
+<p>从上面我画的红黑树的例子和定义看，在红黑树中，红色节点不能相邻，也就是说，有一个红色节点就要至少有一个黑色节点，将它跟其他红色节点隔开。红黑树中包含最多黑色节点的路径不会超过 $log_2n$，所以加入红色节点之后，最长路径不会超过 $2log_2n$，也就是说，红黑树的高度近似 $2log_2n$。</p>
+<p>所以，红黑树的高度只比高度平衡的 AVL 树的高度（$log_2n$）仅仅大了一倍，在性能上，下降得并不多。这样推导出来的结果不够精确，实际上红黑树的性能更好。</p>
+<h2 id="解答开篇"><a href="#解答开篇" class="headerlink" title="解答开篇"></a>解答开篇</h2><p>我们刚刚提到了很多平衡二叉查找树，现在我们就来看下，为什么在工程中大家都喜欢用红黑树这种平衡二叉查找树？</p>
+<p>我们前面提到 Treap、Splay Tree，绝大部分情况下，它们操作的效率都很高，但是也无法避免极端情况下时间复杂度的退化。尽管这种情况出现的概率不大，但是对于单次操作时间非常敏感的场景来说，它们并不适用。</p>
+<p>AVL 树是一种高度平衡的二叉树，所以查找的效率非常高，但是，有利就有弊，AVL 树为了维持这种高度的平衡，就要付出更多的代价。每次插入、删除都要做调整，就比较复杂、耗时。所以，对于有频繁的插入、删除操作的数据集合，使用 AVL 树的代价就有点高了。</p>
+<p>红黑树只是做到了近似平衡，并不是严格的平衡，所以在维护平衡的成本上，要比 AVL 树要低。</p>
+<p>所以，红黑树的插入、删除、查找各种操作性能都比较稳定。对于工程应用来说，要面对各种异常情况，为了支撑这种工业级的应用，我们更倾向于这种性能稳定的平衡二叉查找树。</p>
+<h2 id="内容小结"><a href="#内容小结" class="headerlink" title="内容小结"></a>内容小结</h2><p>很多同学都觉得红黑树很难，的确，它算是最难掌握的一种数据结构。其实红黑树最难的地方是它的实现，我们今天还没有涉及，下一节我会专门来讲。</p>
+<p>不过呢，我认为，我们其实不应该把学习的侧重点，放到它的实现上。那你可能要问了，关于红黑树，我们究竟需要掌握哪些东西呢？</p>
+<p>还记得我多次说过的观点吗？<strong>我们学习数据结构和算法，要学习它的由来、特性、适用的场景以及它能解决的问题。对于红黑树，也不例外。你如果能搞懂这几个问题，其实就已经足够了</strong>。</p>
+<p>红黑树是一种平衡二叉查找树。它是为了解决普通二叉查找树在数据更新的过程中，复杂度退化的问题而产生的。红黑树的高度近似 $log_2n$，所以它是近似平衡，插入、删除、查找操作的时间复杂度都是 O(logn)。</p>
+<p>因为红黑树是一种性能非常稳定的二叉查找树，所以，在工程中，但凡是用到动态插入、删除、查找数据的场景，都可以用到它。不过，它实现起来比较复杂，如果自己写代码实现，难度会有些高，这个时候，我们其实更倾向用跳表来替代它。</p>
+<p>课后思考</p>
+<p>动态数据结构支持动态地数据插入、删除、查找操作，除了红黑树，我们前面还学习过哪些呢？能对比一下各自的优势、劣势，以及应用场景吗？</p>
+<p>散列表：插入删除查找都是O(1), 是最常用的，但其缺点是不能顺序遍历以及扩容缩容的性能损耗。适用于那些不需要顺序遍历，数据更新不那么频繁的。<br>跳表：插入删除查找都是O(logn), 并且能顺序遍历。缺点是空间复杂度O(n)。适用于不那么在意内存空间的，其顺序遍历和区间查找非常方便。<br>红黑树：插入删除查找都是O(logn), 中序遍历即是顺序遍历，稳定。缺点是难以实现，去查找不方便。其实跳表更佳，但红黑树已经用于很多地方了。</p>
+<blockquote>
+<p>参考极客时间《数据结构与算法之美》专栏</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%A0%91/" rel="tag"><i class="fa fa-tag"></i> 树</a>
+              <a href="/dev/tags/%E7%BA%A2%E9%BB%91%E6%A0%91/" rel="tag"><i class="fa fa-tag"></i> 红黑树</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2018/11/15/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E6%9C%89%E4%BA%86%E5%A6%82%E6%AD%A4%E9%AB%98%E6%95%88%E7%9A%84%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E9%9C%80%E8%A6%81%E4%BA%8C%E5%8F%89%E6%A0%91/" rel="prev" title="二叉树基础（下）：有了如此高效的散列表，为什么还需要二叉树">
+      <i class="fa fa-chevron-left"></i> 二叉树基础（下）：有了如此高效的散列表，为什么还需要二叉树
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2018/11/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%A2%E9%BB%91%E6%A0%91%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E6%8E%8C%E6%8F%A1%E8%BF%99%E4%BA%9B%E6%8A%80%E5%B7%A7%EF%BC%8C%E4%BD%A0%E4%B9%9F%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%BA%A2%E9%BB%91%E6%A0%91/" rel="next" title="红黑树（下）：掌握这些技巧，你也可以实现一个红黑树">
+      红黑树（下）：掌握这些技巧，你也可以实现一个红黑树 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是“平衡二叉查找树”"><span class="nav-number">1.</span> <span class="nav-text">什么是“平衡二叉查找树”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何定义一棵“红黑树”"><span class="nav-number">2.</span> <span class="nav-text">如何定义一棵“红黑树”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么说红黑树是“近似平衡”的"><span class="nav-number">3.</span> <span class="nav-text">为什么说红黑树是“近似平衡”的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解答开篇"><span class="nav-number">4.</span> <span class="nav-text">解答开篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内容小结"><span class="nav-number">5.</span> <span class="nav-text">内容小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

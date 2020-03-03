@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="散列表和链表都是如何组合起来使用的，以及为什么散列表和链表会经常放到一块使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="散列表（下）：为什么散列表和链表经常会一起使用">
+<meta property="og:url" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="散列表和链表都是如何组合起来使用的，以及为什么散列表和链表会经常放到一块使用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/1.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/2.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/3.jpg">
+<meta property="og:image" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/4.jpg">
+<meta property="article:published_time" content="2018-11-06T06:03:18.000Z">
+<meta property="article:modified_time" content="2020-03-03T06:40:44.932Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="散列表">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/1.jpg">
+
+<link rel="canonical" href="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>散列表（下）：为什么散列表和链表经常会一起使用 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">64</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          散列表（下）：为什么散列表和链表经常会一起使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2018-11-06 14:03:18" itemprop="dateCreated datePublished" datetime="2018-11-06T14:03:18+08:00">2018-11-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>散列表和链表都是如何组合起来使用的，以及为什么散列表和链表会经常放到一块使用。<br><a id="more"></a><br>在链表那一节，我讲到如何用链表来实现 LRU 缓存淘汰算法，但是链表实现的 LRU 缓存淘汰算法的时间复杂度是 O(n)，当时我也提到了，通过散列表可以将这个时间复杂度降低到 O(1)。</p>
+<p>在跳表那一节，我提到 Redis 的有序集合是使用跳表来实现的，跳表可以看作一种改进版的链表。当时我们也提到，Redis 有序集合不仅使用了跳表，还用到了散列表。</p>
+<p>除此之外，如果你熟悉 Java 编程语言，你会发现 LinkedHashMap 这样一个常用的容器，也用到了散列表和链表两种数据结构。</p>
+<h2 id="LRU-缓存淘汰算法"><a href="#LRU-缓存淘汰算法" class="headerlink" title="LRU 缓存淘汰算法"></a>LRU 缓存淘汰算法</h2><p>在链表那一节中，我提到，借助散列表，我们可以把 LRU 缓存淘汰算法的时间复杂度降低为 O(1)。现在，我们就来看看它是如何做到的。</p>
+<p>首先，我们来回顾一下当时我们是如何通过链表实现 LRU 缓存淘汰算法的。</p>
+<p>我们需要维护一个按照访问时间从大到小有序排列的链表结构。因为缓存大小有限，当缓存空间不够，需要淘汰一个数据的时候，我们就直接将链表头部的结点删除。</p>
+<p>当要缓存某个数据的时候，先在链表中查找这个数据。如果没有找到，则直接将数据放到链表的尾部；如果找到了，我们就把它移动到链表的尾部。因为查找数据需要遍历链表，所以单纯用链表实现的 LRU 缓存淘汰算法的时间复杂很高，是 O(n)。</p>
+<p>实际上，我总结一下，一个缓存（cache）系统主要包含下面这几个操作：</p>
+<ul>
+<li>往缓存中添加一个数据；</li>
+<li>从缓存中删除一个数据；</li>
+<li>在缓存中查找一个数据。</li>
+</ul>
+<p>这三个操作都要涉及“查找”操作，如果单纯地采用链表的话，时间复杂度只能是 O(n)。如果我们将散列表和链表两种数据结构组合使用，可以将这三个操作的时间复杂度都降低到 O(1)。具体的结构就是下面这个样子：<img src="/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/1.jpg" class="" title="图1">我们使用双向链表存储数据，链表中的每个结点处理存储数据（data）、前驱指针（prev）、后继指针（next）之外，还新增了一个特殊的字段 hnext。这个 hnext 有什么作用呢？</p>
+<p>因为我们的散列表是通过链表法解决散列冲突的，所以每个结点会在两条链中。一个链是刚刚我们提到的<strong>双向链表</strong>，另一个链是散列表中的<strong>拉链</strong>。<strong>前驱和后继指针是为了将结点串在双向链表中，hnext 指针是为了将结点串在散列表的拉链中</strong>。</p>
+<p>了解了这个散列表和双向链表的组合存储结构之后，我们再来看，前面讲到的缓存的三个操作，是如何做到时间复杂度是 O(1) 的？</p>
+<h3 id="如何查找一个数据"><a href="#如何查找一个数据" class="headerlink" title="如何查找一个数据"></a>如何查找一个数据</h3><p>我们前面讲过，散列表中查找数据的时间复杂度接近 O(1)，所以通过散列表，我们可以很快地在缓存中找到一个数据。当找到数据之后，我们还需要将它移动到双向链表的尾部。</p>
+<h3 id="如何删除一个数据"><a href="#如何删除一个数据" class="headerlink" title="如何删除一个数据"></a>如何删除一个数据</h3><p>我们需要找到数据所在的结点，然后将结点删除。借助散列表，我们可以在 O(1) 时间复杂度里找到要删除的结点。因为我们的链表是双向链表，双向链表可以通过前驱指针 O(1) 时间复杂度获取前驱结点，所以在双向链表中，删除结点只需要 O(1) 的时间复杂度。</p>
+<h3 id="如何添加一个数据"><a href="#如何添加一个数据" class="headerlink" title="如何添加一个数据"></a>如何添加一个数据</h3><p>添加数据到缓存稍微有点麻烦，我们需要先看这个数据是否已经在缓存中。如果已经在其中，需要将其移动到双向链表的尾部；如果不在其中，还要看缓存有没有满。如果满了，则将双向链表头部的结点删除，然后再将数据放到链表的尾部；如果没有满，就直接将数据放到链表的尾部。</p>
+<p>这整个过程涉及的查找操作都可以通过散列表来完成。其他的操作，比如删除头结点、链表尾部插入数据等，都可以在 O(1) 的时间复杂度内完成。所以，这三个操作的时间复杂度都是 O(1)。至此，我们就通过散列表和双向链表的组合使用，实现了一个高效的、支持 LRU 缓存淘汰算法的缓存系统原型。</p>
+<h3 id="基于散列表的LRU算法代码"><a href="#基于散列表的LRU算法代码" class="headerlink" title="基于散列表的LRU算法代码"></a>基于散列表的LRU算法代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span>:基于散列表的LRU算法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LRUBaseHashTable</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认链表容量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Integer DEFAULT_CAPACITY = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 头结点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> DNode&lt;K, V&gt; headNode;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 尾节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> DNode&lt;K, V&gt; tailNode;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 链表长度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Integer length;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 链表容量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Integer capacity;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 散列表存储key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> HashMap&lt;K, DNode&lt;K, V&gt;&gt; table;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 双向链表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DNode</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> K key;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 数据</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> V value;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 前驱指针</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> DNode&lt;K, V&gt; prev;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 后继指针</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> DNode&lt;K, V&gt; next;</span><br><span class="line"></span><br><span class="line">        DNode() &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        DNode(K key, V value) &#123;</span><br><span class="line">            <span class="keyword">this</span>.key = key;</span><br><span class="line">            <span class="keyword">this</span>.value = value;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LRUBaseHashTable</span><span class="params">(<span class="keyword">int</span> capacity)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.length = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">this</span>.capacity = capacity;</span><br><span class="line"></span><br><span class="line">        headNode = <span class="keyword">new</span> DNode&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        tailNode = <span class="keyword">new</span> DNode&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        headNode.next = tailNode;</span><br><span class="line">        tailNode.prev = headNode;</span><br><span class="line"></span><br><span class="line">        table = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LRUBaseHashTable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(DEFAULT_CAPACITY);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 新增</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">        DNode&lt;K, V&gt; node = table.get(key);</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">            DNode&lt;K, V&gt; newNode = <span class="keyword">new</span> DNode&lt;&gt;(key, value);</span><br><span class="line">            table.put(key, newNode);</span><br><span class="line">            addNode(newNode);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (++length &gt; capacity) &#123;</span><br><span class="line">                DNode&lt;K, V&gt; tail = popTail();</span><br><span class="line">                table.remove(tail.key);</span><br><span class="line">                length--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            node.value = value;</span><br><span class="line">            moveToHead(node);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 将新节点加到头部</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> newNode</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addNode</span><span class="params">(DNode&lt;K, V&gt; newNode)</span> </span>&#123;</span><br><span class="line">        newNode.next = headNode.next;</span><br><span class="line">        newNode.prev = headNode;</span><br><span class="line"></span><br><span class="line">        headNode.next.prev = newNode;</span><br><span class="line">        headNode.next = newNode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 弹出尾部数据节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> DNode&lt;K, V&gt; <span class="title">popTail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DNode&lt;K, V&gt; node = tailNode.prev;</span><br><span class="line">        removeNode(node);</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 移除节点</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> node</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">removeNode</span><span class="params">(DNode&lt;K, V&gt; node)</span> </span>&#123;</span><br><span class="line">        node.prev.next = node.next;</span><br><span class="line">        node.next.prev = node.prev;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 将节点移动到头部</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> node</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">moveToHead</span><span class="params">(DNode&lt;K, V&gt; node)</span> </span>&#123;</span><br><span class="line">        removeNode(node);</span><br><span class="line">        addNode(node);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取节点数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">        DNode&lt;K, V&gt; node = table.get(key);</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        moveToHead(node);</span><br><span class="line">        <span class="keyword">return</span> node.value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 移除节点数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">        DNode&lt;K, V&gt; node = table.get(key);</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        removeNode(node);</span><br><span class="line">        length--;</span><br><span class="line">        table.remove(node.key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">printAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DNode&lt;K, V&gt; node = headNode.next;</span><br><span class="line">        <span class="keyword">while</span> (node.next != <span class="keyword">null</span>) &#123;</span><br><span class="line">            System.out.print(node.value + <span class="string">","</span>);</span><br><span class="line">            node = node.next;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Redis-有序集合"><a href="#Redis-有序集合" class="headerlink" title="Redis 有序集合"></a>Redis 有序集合</h2><p>在跳表那一节，讲到有序集合的操作时，我稍微做了些简化。实际上，在有序集合中，每个成员对象有两个重要的属性，<strong>key</strong>（键值）和<strong>score</strong>（分值）。我们不仅会通过 score 来查找数据，还会通过 key 来查找数据。</p>
+<p>举个例子，比如用户积分排行榜有这样一个功能：我们可以通过用户的 ID 来查找积分信息，也可以通过积分区间来查找用户 ID 或者姓名信息。这里包含 ID、姓名和积分的用户信息，就是成员对象，用户 ID 就是 key，积分就是 score。</p>
+<p>所以，如果我们细化一下 Redis 有序集合的操作，那就是下面这样：</p>
+<ul>
+<li>添加一个成员对象；</li>
+<li>按照键值来删除一个成员对象；</li>
+<li>按照键值来查找一个成员对象；</li>
+<li>按照分值区间查找数据，比如查找积分在 [100, 356] 之间的成员对象；</li>
+<li>按照分值从小到大排序成员变量；</li>
+</ul>
+<p>如果我们仅仅按照分值将成员对象组织成跳表的结构，那按照键值来删除、查询成员对象就会很慢，解决方法与 LRU 缓存淘汰算法的解决方法类似。我们可以再按照键值构建一个散列表，这样按照 key 来删除、查找一个成员对象的时间复杂度就变成了 O(1)。同时，借助跳表结构，其他操作也非常高效。</p>
+<p>实际上，Redis 有序集合的操作还有另外一类，也就是查找成员对象的排名（Rank）或者根据排名区间查找成员对象。这个功能单纯用刚刚讲的这种组合结构就无法高效实现了。这块内容我后面的章节再讲。</p>
+<h2 id="Java-LinkedHashMap"><a href="#Java-LinkedHashMap" class="headerlink" title="Java LinkedHashMap"></a>Java LinkedHashMap</h2><p>前面我们讲了两个散列表和链表结合的例子，现在我们再来看另外一个，Java 中的 LinkedHashMap 这种容器。</p>
+<p>如果你熟悉 Java，那你几乎天天会用到这个容器。我们之前讲过，HashMap 底层是通过散列表这种数据结构实现的。而 LinkedHashMap 前面比 HashMap 多了一个“Linked”，这里的“Linked”是不是说，LinkedHashMap 是一个通过链表法解决散列冲突的散列表呢？</p>
+<p>实际上，LinkedHashMap 并没有这么简单，其中的“Linked”也并不仅仅代表它是通过链表法解决散列冲突的。关于这一点，在我是初学者的时候，也误解了很久。</p>
+<p>我们先来看一段代码。你觉得这段代码会以什么样的顺序打印 3，1，5，2 这几个 key 呢？原因又是什么呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HashMap&lt;Integer, Integer&gt; m = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line">m.put(<span class="number">3</span>, <span class="number">11</span>);</span><br><span class="line">m.put(<span class="number">1</span>, <span class="number">12</span>);</span><br><span class="line">m.put(<span class="number">5</span>, <span class="number">23</span>);</span><br><span class="line">m.put(<span class="number">2</span>, <span class="number">22</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Map.Entry e : m.entrySet()) &#123;</span><br><span class="line">  System.out.println(e.getKey());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我先告诉你答案，上面的代码会按照数据插入的顺序依次来打印，也就是说，打印的顺序就是 3，1，5，2。你有没有觉得奇怪？散列表中数据是经过散列函数打乱之后无规律存储的，这里是如何实现按照数据的插入顺序来遍历打印的呢？</p>
+<p>你可能已经猜到了，LinkedHashMap 也是通过散列表和链表组合在一起实现的。实际上，它不仅支持按照插入顺序遍历数据，还支持按照访问顺序来遍历数据。你可以看下面这段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 10是初始大小，0.75是装载因子，true是表示按照访问时间排序</span></span><br><span class="line">HashMap&lt;Integer, Integer&gt; m = <span class="keyword">new</span> LinkedHashMap&lt;&gt;(<span class="number">10</span>, <span class="number">0.75f</span>, <span class="keyword">true</span>);</span><br><span class="line">m.put(<span class="number">3</span>, <span class="number">11</span>);</span><br><span class="line">m.put(<span class="number">1</span>, <span class="number">12</span>);</span><br><span class="line">m.put(<span class="number">5</span>, <span class="number">23</span>);</span><br><span class="line">m.put(<span class="number">2</span>, <span class="number">22</span>);</span><br><span class="line"></span><br><span class="line">m.put(<span class="number">3</span>, <span class="number">26</span>);</span><br><span class="line">m.get(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Map.Entry e : m.entrySet()) &#123;</span><br><span class="line">  System.out.println(e.getKey());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码打印的结果是 1，2，3，5。我来具体分析一下，为什么这段代码会按照这样顺序来打印。</p>
+<p>每次调用 put() 函数，往 LinkedHashMap 中添加数据的时候，都会将数据添加到链表的尾部，所以，在前四个操作完成之后，链表中的数据是下面这样：<img src="/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/2.jpg" class="" title="图2">在第 8 行代码中，再次将键值为 3 的数据放入到 LinkedHashMap 的时候，会先查找这个键值是否已经有了，然后，再将已经存在的 (3,11) 删除，并且将新的 (3,26) 放到链表的尾部。所以，这个时候链表中的数据就是下面这样：<img src="/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/3.jpg" class="" title="图3">当第 9 行代码访问到 key 为 5 的数据的时候，我们将被访问到的数据移动到链表的尾部。所以，第 9 行代码之后，链表中的数据是下面这样：<img src="/dev/2018/11/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%8B%EF%BC%89%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%A3%E5%88%97%E8%A1%A8%E5%92%8C%E9%93%BE%E8%A1%A8%E7%BB%8F%E5%B8%B8%E4%BC%9A%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8/4.jpg" class="" title="图4">所以，最后打印出来的数据是 1，2，3，5。从上面的分析，你有没有发现，按照访问时间排序的 LinkedHashMap 本身就是一个支持 LRU 缓存淘汰策略的缓存系统？实际上，它们两个的实现原理也是一模一样的。我也就不再啰嗦了。</p>
+<p>我现在来总结一下，实际上，<strong>LinkedHashMap 是通过双向链表和散列表这两种数据结构组合实现的。LinkedHashMap 中的“Linked”实际上是指的是双向链表，并非指用链表法解决散列冲突</strong>。</p>
+<h2 id="解答开篇及内容小结"><a href="#解答开篇及内容小结" class="headerlink" title="解答开篇及内容小结"></a>解答开篇及内容小结</h2><p>弄懂刚刚我讲的这三个例子，开篇的问题也就不言而喻了。我这里总结一下，为什么散列表和链表经常一块使用？</p>
+<p>散列表这种数据结构虽然支持非常高效的数据插入、删除、查找操作，但是散列表中的数据都是通过散列函数打乱之后无规律存储的。也就说，它无法支持按照某种顺序快速地遍历数据。如果希望按照顺序遍历散列表中的数据，那我们需要将散列表中的数据拷贝到数组中，然后排序，再遍历。</p>
+<p>因为散列表是动态数据结构，不停地有数据的插入、删除，所以每当我们希望按顺序遍历散列表中的数据的时候，都需要先排序，那效率势必会很低。为了解决这个问题，我们将散列表和链表（或者跳表）结合在一起使用。</p>
+<blockquote>
+<p>参考极客时间《数据结构与算法之美》专栏</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%95%A3%E5%88%97%E8%A1%A8/" rel="tag"><i class="fa fa-tag"></i> 散列表</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2018/11/03/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%A3%E5%88%97%E8%A1%A8%EF%BC%88%E4%B8%AD%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E5%B7%A5%E4%B8%9A%E7%BA%A7%E6%B0%B4%E5%B9%B3%E7%9A%84%E6%95%A3%E5%88%97%E8%A1%A8/" rel="prev" title="散列表（中）：如何打造一个工业级水平的散列表">
+      <i class="fa fa-chevron-left"></i> 散列表（中）：如何打造一个工业级水平的散列表
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2018/11/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E5%8F%8A%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" rel="next" title="哈希算法及哈希算法的应用场景">
+      哈希算法及哈希算法的应用场景 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#LRU-缓存淘汰算法"><span class="nav-number">1.</span> <span class="nav-text">LRU 缓存淘汰算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何查找一个数据"><span class="nav-number">1.1.</span> <span class="nav-text">如何查找一个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何删除一个数据"><span class="nav-number">1.2.</span> <span class="nav-text">如何删除一个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何添加一个数据"><span class="nav-number">1.3.</span> <span class="nav-text">如何添加一个数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于散列表的LRU算法代码"><span class="nav-number">1.4.</span> <span class="nav-text">基于散列表的LRU算法代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-有序集合"><span class="nav-number">2.</span> <span class="nav-text">Redis 有序集合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-LinkedHashMap"><span class="nav-number">3.</span> <span class="nav-text">Java LinkedHashMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解答开篇及内容小结"><span class="nav-number">4.</span> <span class="nav-text">解答开篇及内容小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      友情链接
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://3927.group/stock" title="http:&#x2F;&#x2F;3927.group&#x2F;stock">stock</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
