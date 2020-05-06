@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="尽管Android系统提供了不少控件，但是有很多酷炫效果仍然是系统原生控件无法实现的。好在Android允许自定义控件，来弥补原生控件的不足">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义View的三种实现方式及自定义属性使用介绍">
+<meta property="og:url" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="尽管Android系统提供了不少控件，但是有很多酷炫效果仍然是系统原生控件无法实现的。好在Android允许自定义控件，来弥补原生控件的不足">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/1.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/2.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/3.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/4.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/5.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/6.png">
+<meta property="og:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/7.png">
+<meta property="article:published_time" content="2019-01-01T09:11:31.000Z">
+<meta property="article:modified_time" content="2020-03-25T09:58:38.274Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="自定义View">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/1.png">
+
+<link rel="canonical" href="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>自定义View的三种实现方式及自定义属性使用介绍 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">65</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">5</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自定义View的三种实现方式及自定义属性使用介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2019-01-01 17:11:31" itemprop="dateCreated datePublished" datetime="2019-01-01T17:11:31+08:00">2019-01-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/Android%E5%B0%8F%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">Android小结</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>尽管Android系统提供了不少控件，但是有很多酷炫效果仍然是系统原生控件无法实现的。好在Android允许自定义控件，来弥补原生控件的不足<br><a id="more"></a><br>实际上实现自定义View的方式，从整体上看，只分为三种：组合控件，继承控件，自绘控件。然后就是根据需要来添加自定义的属性，就这么简单。<img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/1.png" class="" title="图1"></p>
+<h2 id="组合控件"><a href="#组合控件" class="headerlink" title="组合控件"></a>组合控件</h2><p>组合控件，顾名思义，就是将系统原有的控件进行组合，构成一个新的控件。这种方式下，不需要开发者自己去绘制图上显示的内容，也不需要开发者重写onMeasure，onLayout，onDraw方法来实现测量、布局以及draw流程。所以，在实现自定义view的三种方式中，这一种相对比较简单。</p>
+<p>实际开发中，标题栏就是一个比较常见的例子。因为在一个app的各个界面中，标题栏基本上是大同小异，复用率很高。所以经常会将标题栏单独做成一个自定义view，在不同的界面直接引入即可，而不用每次都把标题栏布局一遍。本节就自定义一个标题栏，包含标题和返回按钮两个控件，来介绍这种组合控件的实现方式。</p>
+<h3 id="定义标题栏布局文件"><a href="#定义标题栏布局文件" class="headerlink" title="定义标题栏布局文件"></a>定义标题栏布局文件</h3><p>定义标题栏的布局文件<code>custom_title_view.xml</code>，将返回按钮和标题文本进行组合。这一步用于确定标题栏的样子，代码如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:background</span>=<span class="string">"@android:color/holo_orange_light"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/btn_left"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerVertical</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_marginLeft</span>=<span class="string">"5dp"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">"Back"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textColor</span>=<span class="string">"@android:color/white"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/title_tv"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">"Title"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textColor</span>=<span class="string">"@android:color/white"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textSize</span>=<span class="string">"20sp"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这个布局很简单，就不多说了。</p>
+<h3 id="根据给定布局实现自定义View"><a href="#根据给定布局实现自定义View" class="headerlink" title="根据给定布局实现自定义View"></a>根据给定布局实现自定义View</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomTitleView</span> <span class="keyword">extends</span> <span class="title">FrameLayout</span> <span class="keyword">implements</span> <span class="title">View</span>.<span class="title">OnClickListener</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> View.OnClickListener mLeftOnClickListener;</span><br><span class="line">    <span class="keyword">private</span> Button mBackBtn;</span><br><span class="line">    <span class="keyword">private</span> TextView mTittleView;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomTitleView</span><span class="params">(@NonNull Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">        LayoutInflater.from(context).inflate(R.layout.custom_title_view, <span class="keyword">this</span>);</span><br><span class="line">        mBackBtn = findViewById(R.id.btn_left);</span><br><span class="line">        mBackBtn.setOnClickListener(<span class="keyword">this</span>);</span><br><span class="line">        mTittleView = findViewById(R.id.title_tv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (v.getId()) &#123;</span><br><span class="line">            <span class="keyword">case</span> R.id.btn_left:</span><br><span class="line">                <span class="keyword">if</span> (mLeftOnClickListener != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mLeftOnClickListener.onClick(v);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLeftOnClickListener</span><span class="params">(View.OnClickListener leftOnClickListener)</span> </span>&#123;</span><br><span class="line">        mLeftOnClickListener = leftOnClickListener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTittle</span><span class="params">(String title)</span></span>&#123;</span><br><span class="line">        mTittleView.setText(title);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了编译理解和记忆，这里对该部分做一点说明：</p>
+<ol>
+<li>代码中对外提供了两个接口，一是动态设置标题，二是使用者可以自定义返回按钮的点击事件。</li>
+<li>CustomTitleView的构造函数，要选择两个参数的，选择其它参数的构造函数会报错。这一点是笔者开发机测试的结果，暂时不清楚是不是所有手机上都是这样。</li>
+<li>这里是继承的FrameLayout，但是继承LinearLayout，RelativeLayout等系统布局控件都可以。之所以要继承这些系统现成的ViewGroup，是因为这样可以不用再重写onMeasure，onLayout等，这样省事很多。由于这里是一个布局控件，要用LayoutInflater来填充，所以需要继承ViewGroup，如果继承View的直接子类，编译会不通过。所以，CustomTitleView自己就是一个容器，完全可以当成容器使用，此时CustomTitleView自身的内容会和其作为父布局添加的子控件，效果会叠加，具体的叠加效果是根据继承的容器特性决定的。</li>
+</ol>
+<h3 id="在Activity的布局文件中添加CustomTitleView"><a href="#在Activity的布局文件中添加CustomTitleView" class="headerlink" title="在Activity的布局文件中添加CustomTitleView"></a>在Activity的布局文件中添加CustomTitleView</h3><p>在Activity的布局文件activity_custom_view_compose_demo.xml中，像使用系统控件一样使用CustomTitleView即可。前说了，CustomTitleView自己就是继承的现成的系统布局，所以它们拥有的属性特性，CustomTitleView一样拥有。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.CustomTitleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/customview_title"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.example.demos.customviewdemo.CustomTitleView</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="在Activity中操作CustomTitleView"><a href="#在Activity中操作CustomTitleView" class="headerlink" title="在Activity中操作CustomTitleView"></a>在Activity中操作CustomTitleView</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomViewComposeDemoActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> CustomTitleView mCustomTitleView;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_custom_view_compose_demo);</span><br><span class="line">        mCustomTitleView = findViewById(R.id.customview_title);</span><br><span class="line">        mCustomTitleView.setTittle(<span class="string">"This is Title"</span>);</span><br><span class="line">        mCustomTitleView.setLeftOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">                finish();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在第8行中，获取到CustomTitleView实例，第9行设置标题文字，第10行自定义“Back”按钮点击事件。</p>
+<h3 id="组合控件效果图"><a href="#组合控件效果图" class="headerlink" title="组合控件效果图"></a>组合控件效果图</h3><p>按照如上的4步，就通过组合控件完成了一个比较简单的自定义标题栏。可见，这种方式是非常简单的。<img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/2.png" class="" title="图2"></p>
+<h2 id="继承控件"><a href="#继承控件" class="headerlink" title="继承控件"></a>继承控件</h2><p>通过继承系统控件（View子类控件或ViewGroup子类控件）来完成自定义View，一般是希望在原有系统控件基础上做一些修饰性的修改，而不会做大幅度的改动，如在TextView的文字下方添加下划线，在LinearLayout布局中加一个蒙板等。这种方式往往都会复用系统控件的onMeasure和onLayout方法，而只需要重写onDraw方法，在其中绘制一些需要的内容。下面会分别继承View类控件和ViewGroup类控件来举例说明。</p>
+<h3 id="继承View类系统控件"><a href="#继承View类系统控件" class="headerlink" title="继承View类系统控件"></a>继承View类系统控件</h3><p>如下示例为在TextView文字下方显示红色下划线，其基本步骤如下：</p>
+<h4 id="继承View并重写onDraw方法"><a href="#继承View并重写onDraw方法" class="headerlink" title="继承View并重写onDraw方法"></a>继承View并重写onDraw方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SuppressLint</span>(<span class="string">"AppCompatCustomView"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UnderlineTextView</span> <span class="keyword">extends</span> <span class="title">TextView</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">UnderlineTextView</span><span class="params">(Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line">        Paint paint = <span class="keyword">new</span> Paint();</span><br><span class="line">        paint.setColor(Color.RED);</span><br><span class="line">        paint.setStrokeWidth(<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">int</span> width = getWidth();</span><br><span class="line">        <span class="keyword">int</span> height = getBaseline();</span><br><span class="line">        canvas.drawLine(<span class="number">0</span>,height,width,height,paint);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="在布局文件中调用"><a href="#在布局文件中调用" class="headerlink" title="在布局文件中调用"></a>在布局文件中调用</h4><p>就像使用一个普通TextView一样使用UnderlineTextView。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.UnderlineTextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textSize</span>=<span class="string">"50dp"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">"Hello World!"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="继承View类效果图"><a href="#继承View类效果图" class="headerlink" title="继承View类效果图"></a>继承View类效果图</h4><img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/3.png" class="" title="图3">
+<h3 id="继承ViewGroup类系统控件"><a href="#继承ViewGroup类系统控件" class="headerlink" title="继承ViewGroup类系统控件"></a>继承ViewGroup类系统控件</h3><p>如下示例演示，在layout布局上添加一个浅红色的半透明蒙板，这种需求在工作中也是非常常见的。</p>
+<h4 id="继承ViewGroup类系统控件代码"><a href="#继承ViewGroup类系统控件代码" class="headerlink" title="继承ViewGroup类系统控件代码"></a>继承ViewGroup类系统控件代码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ForegroundLinearLayout</span> <span class="keyword">extends</span> <span class="title">LinearLayout</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ForegroundLinearLayout</span><span class="params">(Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">dispatchDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.dispatchDraw(canvas);</span><br><span class="line">        canvas.drawColor(Color.parseColor(<span class="string">"#50FF0000"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="继承ViewGroup类在布局文件中调用"><a href="#继承ViewGroup类在布局文件中调用" class="headerlink" title="继承ViewGroup类在布局文件中调用"></a>继承ViewGroup类在布局文件中调用</h4><p>对ForegroundLinearLayout的使用，就和使用其父类LinearLayout一样。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.ForegroundLinearLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"200dp"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:gravity</span>=<span class="string">"center"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Hello World!"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:textColor</span>=<span class="string">"@android:color/black"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:textSize</span>=<span class="string">"50dp"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.example.demos.customviewdemo.ForegroundLinearLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="继承ViewGroup类效果图"><a href="#继承ViewGroup类效果图" class="headerlink" title="继承ViewGroup类效果图"></a>继承ViewGroup类效果图</h4><p>在宽为全屏宽度，高为200dp的布局范围内，绘制完子其子控件TextView后，在上面覆盖了一层浅红色的半透明蒙板。<img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/4.png" class="" title="图4"></p>
+<p>从上面两个例子可见，继承系统原有的控件来实现自定义View，步骤非常简单，比组合控件简单多了。但是这一节需要对Canvas，paint等绘制方面的知识有一定的了解，且还需要对ViewGroup的中内容的绘制顺序有一定的了解，才能在原生控件的基础上做出想要的效果来。</p>
+<h2 id="自绘控件"><a href="#自绘控件" class="headerlink" title="自绘控件"></a>自绘控件</h2><p>这三种方法中，自绘控件是最复杂的，因为所有的绘制逻辑和流程都需要自己完成。采用自绘控件这种方式时，如果自定义View为最终的叶子控件，那么需要直接继承View；而不过自定义View为容器类控件，则需要直接继承ViewGroup。这里依然针对直接继承View和ViewGroup分别举例进行说明。</p>
+<h3 id="自绘叶子View控件"><a href="#自绘叶子View控件" class="headerlink" title="自绘叶子View控件"></a>自绘叶子View控件</h3><p>这里通过画一个直方图来展示自绘View控件的实现。</p>
+<h4 id="直接继承View类"><a href="#直接继承View类" class="headerlink" title="直接继承View类"></a>直接继承View类</h4><p>自绘叶子View控件时，最主要工作就是绘制出丰富的内容，这一过程是在重写的onDraw方法中实现的。由于是叶子view，它没有子控件了，所以重写onLayout没有意义。onMeasure的方法可以根据自己的需要来决定是否需要重写，很多情况下，不重写该方法并不影响正常的绘制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HistogramView</span> <span class="keyword">extends</span> <span class="title">View</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Paint mPaint;</span><br><span class="line">    <span class="keyword">private</span> Path mPath;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HistogramView</span><span class="params">(Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">        mPaint = <span class="keyword">new</span> Paint();</span><br><span class="line">        mPath = <span class="keyword">new</span> Path();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line">        <span class="comment">//绘制坐标轴</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPath.reset();</span><br><span class="line">        mPaint.setColor(Color.BLACK);</span><br><span class="line">        mPaint.setStyle(Paint.Style.STROKE);</span><br><span class="line">        mPath.moveTo(<span class="number">100</span>,<span class="number">100</span>);</span><br><span class="line">        mPath.rLineTo(<span class="number">0</span>,<span class="number">402</span>);</span><br><span class="line">        mPath.rLineTo(<span class="number">800</span>,<span class="number">0</span>);</span><br><span class="line">        canvas.drawPath(mPath,mPaint);</span><br><span class="line">        <span class="comment">//绘制文字</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPaint.setTextSize(<span class="number">30</span>);</span><br><span class="line">        mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">        canvas.drawText(<span class="string">"Froyo"</span>,<span class="number">160</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"CB"</span>,<span class="number">280</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"ICS"</span>,<span class="number">380</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"J"</span>,<span class="number">480</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"KitKat"</span>,<span class="number">560</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"L"</span>,<span class="number">690</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"M"</span>,<span class="number">790</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        <span class="comment">//绘制直方图，柱形图是用较粗的直线来实现的</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPaint.setColor(Color.GREEN);</span><br><span class="line">        mPaint.setStrokeWidth(<span class="number">80</span>);</span><br><span class="line">        <span class="keyword">float</span>[] lines3=&#123;</span><br><span class="line">                <span class="number">200</span>,<span class="number">500</span>,<span class="number">200</span>,<span class="number">495</span>,</span><br><span class="line">                <span class="number">300</span>,<span class="number">500</span>,<span class="number">300</span>,<span class="number">480</span>,</span><br><span class="line">                <span class="number">400</span>,<span class="number">500</span>,<span class="number">400</span>,<span class="number">480</span>,</span><br><span class="line">                <span class="number">500</span>,<span class="number">500</span>,<span class="number">500</span>,<span class="number">300</span>,</span><br><span class="line">                <span class="number">600</span>,<span class="number">500</span>,<span class="number">600</span>,<span class="number">200</span>,</span><br><span class="line">                <span class="number">700</span>,<span class="number">500</span>,<span class="number">700</span>,<span class="number">150</span>,</span><br><span class="line">                <span class="number">800</span>,<span class="number">500</span>,<span class="number">800</span>,<span class="number">350</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        canvas.drawLines(lines3,mPaint);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="在Activity界面的布局文件中引入"><a href="#在Activity界面的布局文件中引入" class="headerlink" title="在Activity界面的布局文件中引入"></a>在Activity界面的布局文件中引入</h4><p>和其它自定义控件一样，直接在布局文件中引入即可。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.HistogramView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="自绘控件继承View类效果图"><a href="#自绘控件继承View类效果图" class="headerlink" title="自绘控件继承View类效果图"></a>自绘控件继承View类效果图</h4><img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/5.png" class="" title="图5">
+<h3 id="自绘ViewGroup控件"><a href="#自绘ViewGroup控件" class="headerlink" title="自绘ViewGroup控件"></a>自绘ViewGroup控件</h3><p>这里通过自定义一个父布局控件，并添加一个子view来作为例子讲解该方法的实现。</p>
+<h4 id="直接继承ViewGroup类"><a href="#直接继承ViewGroup类" class="headerlink" title="直接继承ViewGroup类"></a>直接继承ViewGroup类</h4><p>自绘ViewGroup控件，需要直接继承ViewGroup，在该系列第一篇文章中将绘制流程的时候就讲过，onLayout是ViewGroup中的抽象方法，其直接继承者必须实现该方法。所以这里，onLayout方法必须要实现的，如果这里面的方法体为空，那该控件的子view就无法显示了。要想准确测量，onMeasure方法也是要重写的。下面例子中，只演示了第一个子view的测量和布局，onLayout方法中的child.layout，就完成了对子view的布局。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomLayout</span> <span class="keyword">extends</span> <span class="title">ViewGroup</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomLayout</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">        <span class="keyword">if</span> (getChildCount() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">//只测量第一个child</span></span><br><span class="line">            View child = getChildAt(<span class="number">0</span>);</span><br><span class="line">            measureChild(child, widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (getChildCount() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">//只布局第一个child</span></span><br><span class="line">            View child = getChildAt(<span class="number">0</span>);</span><br><span class="line">            child.layout(<span class="number">0</span>, <span class="number">0</span>, child.getMeasuredWidth(), child.getMeasuredHeight());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="在布局文件中和普通父布局一样被引入"><a href="#在布局文件中和普通父布局一样被引入" class="headerlink" title="在布局文件中和普通父布局一样被引入"></a>在布局文件中和普通父布局一样被引入</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.CustomLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Hello World!"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:textSize</span>=<span class="string">"50dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.example.demos.customviewdemo.CustomLayout</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="自绘ViewGroup控件效果图"><a href="#自绘ViewGroup控件效果图" class="headerlink" title="自绘ViewGroup控件效果图"></a>自绘ViewGroup控件效果图</h4><img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/6.png" class="" title="图6">
+<p>上述代码中第8行没有起效，从布局上看TextView应该是处于屏幕的正中央，但是实际结果却还是在左上方显示。这是因为CustomLayout控件，并没有实现<code>android:layout_centerInParent</code>这个属性，所以是无效的。关于属性的问题，正是下一节要介绍的内容。</p>
+<h2 id="在自定义View中使用自定义属性"><a href="#在自定义View中使用自定义属性" class="headerlink" title="在自定义View中使用自定义属性"></a>在自定义View中使用自定义属性</h2><p>我们在使用Android原生控件的时候，经常可以看到在布局文件中可以设置很多的属性值，如</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/title_tv"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_centerInParent</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">"Title"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textColor</span>=<span class="string">"@android:color/white"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textSize</span>=<span class="string">"20sp"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里可以根据需要随时设置TextView要显示的文字，文字颜色，文字大小等各种属性，给使用者带来了极大的方便。我们在使用自定义View的时候，也非常希望能够像TextView等系统原生控件一样通过设置属性值来个性化自定义View。本节咱们在上一节自定义直方图的基础上，来介绍自定义属性的基本使用流程。</p>
+<h3 id="在values中编写需要的属性"><a href="#在values中编写需要的属性" class="headerlink" title="在values中编写需要的属性"></a>在values中编写需要的属性</h3><p>在res/values/下新建资源文件，这里咱们命名为attrs.xml，在其中编写所需要的属性</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">declare-styleable</span> <span class="attr">name</span>=<span class="string">"HistogramView"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">"textColor"</span> <span class="attr">format</span>=<span class="string">"color"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">"histogramColor"</span> <span class="attr">format</span>=<span class="string">"color"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">declare-styleable</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里<code>&lt;declare-styleable&gt;</code>中的name是自行命名的，可以理解为这个自定义属性集合的名称。代码中包含了两个自定义属性，名称分别为“textColor”和“histogramColor”，这里用来设置直方图中文字的颜色和直方图的颜色。format表示的是属性的格式，这里均设置为“color”，表示对应的属性是用来设置颜色值的。对于“format”，后面还会详细讲到。其它的就是固定的格式了，直接套用就行。</p>
+<h3 id="在自定义View中引入属性"><a href="#在自定义View中引入属性" class="headerlink" title="在自定义View中引入属性"></a>在自定义View中引入属性</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HistogramView</span> <span class="keyword">extends</span> <span class="title">View</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Paint mPaint;</span><br><span class="line">    <span class="keyword">private</span> Path mPath;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> mTextColor,mHistogramColor;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HistogramView</span><span class="params">(Context context, @Nullable AttributeSet attrs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, attrs);</span><br><span class="line">        mPaint = <span class="keyword">new</span> Paint();</span><br><span class="line">        mPath = <span class="keyword">new</span> Path();</span><br><span class="line">        initAttrs(context,attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initAttrs</span><span class="params">(Context context, AttributeSet attrs)</span></span>&#123;</span><br><span class="line">        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HistogramView);</span><br><span class="line">        mTextColor = typedArray.getColor(R.styleable.HistogramView_textColor,Color.BLACK);</span><br><span class="line">        mHistogramColor = typedArray.getColor(R.styleable.HistogramView_histogramColor,Color.GREEN);</span><br><span class="line">        typedArray.recycle();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line">        <span class="comment">//绘制坐标轴</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPath.reset();</span><br><span class="line">        mPaint.setColor(Color.BLACK);</span><br><span class="line">        mPaint.setStyle(Paint.Style.STROKE);</span><br><span class="line">        mPath.moveTo(<span class="number">100</span>,<span class="number">100</span>);</span><br><span class="line">        mPath.rLineTo(<span class="number">0</span>,<span class="number">402</span>);</span><br><span class="line">        mPath.rLineTo(<span class="number">800</span>,<span class="number">0</span>);</span><br><span class="line">        canvas.drawPath(mPath,mPaint);</span><br><span class="line">        <span class="comment">//绘制文字</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPaint.setTextSize(<span class="number">30</span>);</span><br><span class="line">        mPaint.setColor(mTextColor);</span><br><span class="line">        mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">        canvas.drawText(<span class="string">"Froyo"</span>,<span class="number">160</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"CB"</span>,<span class="number">280</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"ICS"</span>,<span class="number">380</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"J"</span>,<span class="number">480</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"KitKat"</span>,<span class="number">560</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"L"</span>,<span class="number">690</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        canvas.drawText(<span class="string">"M"</span>,<span class="number">790</span>,<span class="number">540</span>,mPaint);</span><br><span class="line">        <span class="comment">//绘制直方图，柱形图是用较粗的直线来实现的</span></span><br><span class="line">        mPaint.reset();</span><br><span class="line">        mPaint.setColor(mHistogramColor);</span><br><span class="line">        mPaint.setStrokeWidth(<span class="number">80</span>);</span><br><span class="line">        <span class="keyword">float</span>[] lines3=&#123;</span><br><span class="line">                <span class="number">200</span>,<span class="number">500</span>,<span class="number">200</span>,<span class="number">495</span>,</span><br><span class="line">                <span class="number">300</span>,<span class="number">500</span>,<span class="number">300</span>,<span class="number">480</span>,</span><br><span class="line">                <span class="number">400</span>,<span class="number">500</span>,<span class="number">400</span>,<span class="number">480</span>,</span><br><span class="line">                <span class="number">500</span>,<span class="number">500</span>,<span class="number">500</span>,<span class="number">300</span>,</span><br><span class="line">                <span class="number">600</span>,<span class="number">500</span>,<span class="number">600</span>,<span class="number">200</span>,</span><br><span class="line">                <span class="number">700</span>,<span class="number">500</span>,<span class="number">700</span>,<span class="number">150</span>,</span><br><span class="line">                <span class="number">800</span>,<span class="number">500</span>,<span class="number">800</span>,<span class="number">350</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        canvas.drawLines(lines3,mPaint);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将上述代码和前面第三节中自绘直方图代码对比，红色部分是修改或新增的代码。第15~20行代码就是初始化属性的地方，这个过程需要在构造函数中完成。其中，第16行是和自定义属性集建立联系，第17和18行是获取开发者在布局文件中使用时设置的相应属性值，如果没有设置，则会使用默认设置的颜色，分别为Color.BLACK和Color.GREEN。这里注意第19行，用完后一定要回收资源。这样就初始化了文字颜色mTextColor值和mHistogramColor值，在后面onDraw中就使用该值来绘制对应的部分。</p>
+<h3 id="在布局文件中设置属性值"><a href="#在布局文件中设置属性值" class="headerlink" title="在布局文件中设置属性值"></a>在布局文件中设置属性值</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.example.demos.customviewdemo.HistogramView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:textColor</span>=<span class="string">"@android:color/holo_red_light"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:histogramColor</span>=<span class="string">"@android:color/holo_blue_bright"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这段代码中，第3，10，11行和以往的布局文件有些不一样，这是使用自定义属性时的固定格式。第3行中，如果布局文件中没有这一句，一定要加上，这句是声明命名空间，只有声明了命名空间才能使用自定义属性。“app”是该命名空间的名称，这里是自行命名的，不一定非要用“app”。第10行和11行，“app:attrName”表示用的是自定义的属性，固定用法，前面mTextColor和mHistogramColor值就是从这里获取的。</p>
+<p>还记得上一节结尾处说“android:layout_centerInParent”没有起效吗？现在我们知道，这里设置的属性，是在自定义View代码中获取该值，根据该值来确定显示效果的。“android:layout_centerInParent”的值在View的源码中没有被使用，所以设置后也就无效了。“android:layout_width”和“android:layout_height”属性是必须要有的，所有的View的实现都要用到这两个属性来确定宽高。现在，咱们应该明白，设置控件属性值是如何起作用的了吧。</p>
+<h3 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h3><img src="/dev/2019/01/01/Android/Android%E5%B0%8F%E7%BB%93/%E8%87%AA%E5%AE%9A%E4%B9%89View%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/7.png" class="" title="图7">
+<h2 id="自定义属性格式汇总"><a href="#自定义属性格式汇总" class="headerlink" title="自定义属性格式汇总"></a>自定义属性格式汇总</h2><p>在上面一节中，仅仅只是对文字颜色和直方图颜色的属性值做了设置，是为了演示自定义属性的使用步骤。在实际开发中，完全可以定义更多类型的属性，如显示文字的内容，文字的大小，直方图的宽度等。format也不只限定于“color”，还有“String”，“Integer”等，多种多样。本节就汇总一下平时比较常用的一些属性format。</p>
+<h3 id="常用的11种format类型"><a href="#常用的11种format类型" class="headerlink" title="常用的11种format类型"></a>常用的11种format类型</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">declare-styleable</span> <span class="attr">name</span>=<span class="string">"SelfAttr"</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--1.reference：参考某一资源ID--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">"background"</span> <span class="attr">format</span>=<span class="string">"reference"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--2. color：颜色值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"textColor"</span> <span class="attr">format</span> = <span class="string">"color"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--3.boolean：布尔值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"focusable"</span> <span class="attr">format</span> = <span class="string">"boolean"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--4.dimension：尺寸值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"layout_width"</span> <span class="attr">format</span> = <span class="string">"dimension"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--5. float：浮点值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"fromAlpha"</span> <span class="attr">format</span> = <span class="string">"float"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--6.integer：整型值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"lines"</span> <span class="attr">format</span>=<span class="string">"integer"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--7.string：字符串--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"text"</span> <span class="attr">format</span> = <span class="string">"string"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--8.fraction：百分数--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"pivotX"</span> <span class="attr">format</span> = <span class="string">"fraction"</span> /&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--9.enum：枚举值。属性值只能选择枚举值中的一个--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">"orientation"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">enum</span> <span class="attr">name</span>=<span class="string">"horizontal"</span> <span class="attr">value</span>=<span class="string">"0"</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">enum</span> <span class="attr">name</span>=<span class="string">"vertical"</span> <span class="attr">value</span>=<span class="string">"1"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">attr</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--10.flag：位或运算。属性值可以选择其中多个值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">"gravity"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">flag</span> <span class="attr">name</span>=<span class="string">"top"</span> <span class="attr">value</span>=<span class="string">"0x01"</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">flag</span> <span class="attr">name</span>=<span class="string">"bottom"</span> <span class="attr">value</span>=<span class="string">"0x02"</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">flag</span> <span class="attr">name</span>=<span class="string">"left"</span> <span class="attr">value</span>=<span class="string">"0x04"</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">flag</span> <span class="attr">name</span>=<span class="string">"right"</span> <span class="attr">value</span>=<span class="string">"0x08"</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">flag</span> <span class="attr">name</span>=<span class="string">"center_vertical"</span> <span class="attr">value</span>=<span class="string">"0x16"</span> /&gt;</span></span><br><span class="line">            ...</span><br><span class="line">        <span class="tag">&lt;/<span class="name">attr</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--11.混合类型：属性定义时可以指定多种类型值--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span> = <span class="string">"background_2"</span> <span class="attr">format</span> = <span class="string">"reference|color"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">declare-styleable</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如上列出了平时工作中在常见的11种类型的格式，说是11种，但最后一种是前面10种的组合而已。看到上述的属性名称应该很熟悉吧，都是系统原生控件的属性名称。</p>
+<h3 id="使用举例"><a href="#使用举例" class="headerlink" title="使用举例"></a>使用举例</h3><p>如下对上述属性的使用一一举例演示，可以对照着来理解，都是平时常用的系统控件。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--1.reference：参考某一资源ID--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span> <span class="attr">android:background</span> = <span class="string">"@drawable/图片ID"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--2. color：颜色值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textColor</span> = <span class="string">"#00FF00"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--3.boolean：布尔值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:focusable</span> = <span class="string">"true"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--4.dimension：尺寸值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:layout_width</span> = <span class="string">"42dp"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--5. float：浮点值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alpha</span> <span class="attr">android:fromAlpha</span> = <span class="string">"1.0"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--6.integer：整型值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:lines</span>=<span class="string">"1"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--7.string：字符串--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span> = <span class="string">"我是文本"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--8.fraction：百分数--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">rotate</span> <span class="attr">android:pivotX</span> = <span class="string">"200%"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--9.enum：枚举值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:orientation</span> = <span class="string">"vertical"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--10.flag：位或运算--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:gravity</span>=<span class="string">"bottom|left"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--11.混合类型：属性定义时可以指定多种类型值--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span> <span class="attr">android:background</span> = <span class="string">"@drawable/图片ID"</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--或者--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span> <span class="attr">android:background</span> = <span class="string">"#00FF00"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>关于自定义View的3中实现方式以及自定义属性的使用，这里就讲完了。读完后，是不是发现基本的实现流程其实非常简单呢？当然，本文为了说明实现流程，所以举的例子都比较简单，但不是说绘制内容也一样简单。就好像办理入学手续很简单，但读书这件事却不那么容易一样。要完成一些酷炫的自定义View，还需要好好地掌握Canvas，Paint，Path等工具的使用，以及View的绘制流程原理。</p>
+<blockquote>
+<p><a href="https://www.cnblogs.com/andy-songwei/p/10979161.html" target="_blank" rel="noopener">https://www.cnblogs.com/andy-songwei/p/10979161.html</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E8%87%AA%E5%AE%9A%E4%B9%89View/" rel="tag"><i class="fa fa-tag"></i> 自定义View</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2018/12/20/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E5%88%86%E6%B2%BB%E7%AE%97%E6%B3%95%EF%BC%9A%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%A7%E8%A7%84%E6%A8%A1%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6MapReduce%E4%B8%AD%E7%9A%84%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3/" rel="prev" title="分治算法：谈一谈大规模计算框架MapReduce中的分治思想">
+      <i class="fa fa-chevron-left"></i> 分治算法：谈一谈大规模计算框架MapReduce中的分治思想
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2020/01/03/Android/Android%E5%B0%8F%E7%BB%93/%E6%80%BB%E7%BB%93WebView%E4%B8%8EJS%E7%9A%84%E4%BA%A4%E4%BA%92%E6%96%B9%E5%BC%8F/" rel="next" title="总结WebView与JS的交互方式">
+      总结WebView与JS的交互方式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#组合控件"><span class="nav-number">1.</span> <span class="nav-text">组合控件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义标题栏布局文件"><span class="nav-number">1.1.</span> <span class="nav-text">定义标题栏布局文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据给定布局实现自定义View"><span class="nav-number">1.2.</span> <span class="nav-text">根据给定布局实现自定义View</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在Activity的布局文件中添加CustomTitleView"><span class="nav-number">1.3.</span> <span class="nav-text">在Activity的布局文件中添加CustomTitleView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在Activity中操作CustomTitleView"><span class="nav-number">1.4.</span> <span class="nav-text">在Activity中操作CustomTitleView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组合控件效果图"><span class="nav-number">1.5.</span> <span class="nav-text">组合控件效果图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#继承控件"><span class="nav-number">2.</span> <span class="nav-text">继承控件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#继承View类系统控件"><span class="nav-number">2.1.</span> <span class="nav-text">继承View类系统控件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#继承View并重写onDraw方法"><span class="nav-number">2.1.1.</span> <span class="nav-text">继承View并重写onDraw方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在布局文件中调用"><span class="nav-number">2.1.2.</span> <span class="nav-text">在布局文件中调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#继承View类效果图"><span class="nav-number">2.1.3.</span> <span class="nav-text">继承View类效果图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#继承ViewGroup类系统控件"><span class="nav-number">2.2.</span> <span class="nav-text">继承ViewGroup类系统控件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#继承ViewGroup类系统控件代码"><span class="nav-number">2.2.1.</span> <span class="nav-text">继承ViewGroup类系统控件代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#继承ViewGroup类在布局文件中调用"><span class="nav-number">2.2.2.</span> <span class="nav-text">继承ViewGroup类在布局文件中调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#继承ViewGroup类效果图"><span class="nav-number">2.2.3.</span> <span class="nav-text">继承ViewGroup类效果图</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自绘控件"><span class="nav-number">3.</span> <span class="nav-text">自绘控件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自绘叶子View控件"><span class="nav-number">3.1.</span> <span class="nav-text">自绘叶子View控件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#直接继承View类"><span class="nav-number">3.1.1.</span> <span class="nav-text">直接继承View类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在Activity界面的布局文件中引入"><span class="nav-number">3.1.2.</span> <span class="nav-text">在Activity界面的布局文件中引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自绘控件继承View类效果图"><span class="nav-number">3.1.3.</span> <span class="nav-text">自绘控件继承View类效果图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自绘ViewGroup控件"><span class="nav-number">3.2.</span> <span class="nav-text">自绘ViewGroup控件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#直接继承ViewGroup类"><span class="nav-number">3.2.1.</span> <span class="nav-text">直接继承ViewGroup类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在布局文件中和普通父布局一样被引入"><span class="nav-number">3.2.2.</span> <span class="nav-text">在布局文件中和普通父布局一样被引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自绘ViewGroup控件效果图"><span class="nav-number">3.2.3.</span> <span class="nav-text">自绘ViewGroup控件效果图</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在自定义View中使用自定义属性"><span class="nav-number">4.</span> <span class="nav-text">在自定义View中使用自定义属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在values中编写需要的属性"><span class="nav-number">4.1.</span> <span class="nav-text">在values中编写需要的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在自定义View中引入属性"><span class="nav-number">4.2.</span> <span class="nav-text">在自定义View中引入属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在布局文件中设置属性值"><span class="nav-number">4.3.</span> <span class="nav-text">在布局文件中设置属性值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#效果图"><span class="nav-number">4.4.</span> <span class="nav-text">效果图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义属性格式汇总"><span class="nav-number">5.</span> <span class="nav-text">自定义属性格式汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常用的11种format类型"><span class="nav-number">5.1.</span> <span class="nav-text">常用的11种format类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用举例"><span class="nav-number">5.2.</span> <span class="nav-text">使用举例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">6.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
