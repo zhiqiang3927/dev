@@ -28,7 +28,7 @@
 <meta property="og:description" content="MMKV 是基于 mmap 内存映射的 key-value 组件，底层序列化&#x2F;反序列化使用 protobuf 实现，性能高，稳定性强。从 2015 年中至今在微信上使用，其性能和稳定性经过了时间的验证。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-05-09T10:25:54.000Z">
-<meta property="article:modified_time" content="2020-05-09T10:39:46.261Z">
+<meta property="article:modified_time" content="2020-06-11T12:30:43.506Z">
 <meta property="article:author" content="Jackzhou">
 <meta property="article:tag" content="组件化">
 <meta name="twitter:card" content="summary">
@@ -136,7 +136,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">88</span></a>
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">90</span></a>
 
   </li>
   </ul>
@@ -189,9 +189,8 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              
 
-              <time title="创建时间：2020-05-09 18:25:54 / 修改时间：18:39:46" itemprop="dateCreated datePublished" datetime="2020-05-09T18:25:54+08:00">2020-05-09</time>
+              <time title="创建时间：2020-05-09 18:25:54" itemprop="dateCreated datePublished" datetime="2020-05-09T18:25:54+08:00">2020-05-09</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -214,7 +213,8 @@
 
       
         <p>MMKV 是基于 mmap 内存映射的 key-value 组件，底层序列化/反序列化使用 protobuf 实现，性能高，稳定性强。从 2015 年中至今在微信上使用，其性能和稳定性经过了时间的验证。<br><a id="more"></a></p>
-<h2 id="MMKV-配置"><a href="#MMKV-配置" class="headerlink" title="MMKV 配置"></a>MMKV 配置</h2><p><a href="https://github.com/Tencent/MMKV/wiki/android_tutorial_cn" target="_blank" rel="noopener">MMKV 配置 参考地址</a></p>
+<h2 id="MMKV-配置"><a href="#MMKV-配置" class="headerlink" title="MMKV 配置"></a>MMKV 配置</h2><p><a href="https://github.com/Tencent/MMKV" target="_blank" rel="noopener">MMKV Github 地址</a></p>
+<p><a href="https://github.com/Tencent/MMKV/wiki/android_tutorial_cn" target="_blank" rel="noopener">MMKV 配置 参考地址</a></p>
 <h3 id="配置-MMKV-根目录"><a href="#配置-MMKV-根目录" class="headerlink" title="配置 MMKV 根目录"></a>配置 MMKV 根目录</h3><p>在 App 启动时初始化 MMKV，设定 MMKV 的根目录（files/mmkv/），例如在 Application 里</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//init MMKV</span></span><br><span class="line">String rootDir = MMKV.initialize(<span class="keyword">this</span>);</span><br><span class="line"><span class="keyword">if</span> (BuildConfig.DEBUG) &#123;</span><br><span class="line">    MLogUtils.info(<span class="string">"mmkv"</span>,rootDir);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="CRUD-操作"><a href="#CRUD-操作" class="headerlink" title="CRUD 操作"></a>CRUD 操作</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.tencent.mmkv.MMKV;</span><br><span class="line">...</span><br><span class="line">MMKV kv = MMKV.defaultMMKV();</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"bool"</span>, <span class="keyword">true</span>);</span><br><span class="line">System.out.println(<span class="string">"bool: "</span> + kv.decodeBool(<span class="string">"bool"</span>));</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"int"</span>, Integer.MIN_VALUE);</span><br><span class="line">System.out.println(<span class="string">"int: "</span> + kv.decodeInt(<span class="string">"int"</span>));</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"long"</span>, Long.MAX_VALUE);</span><br><span class="line">System.out.println(<span class="string">"long: "</span> + kv.decodeLong(<span class="string">"long"</span>));</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"float"</span>, -<span class="number">3.14f</span>);</span><br><span class="line">System.out.println(<span class="string">"float: "</span> + kv.decodeFloat(<span class="string">"float"</span>));</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"double"</span>, Double.MIN_VALUE);</span><br><span class="line">System.out.println(<span class="string">"double: "</span> + kv.decodeDouble(<span class="string">"double"</span>));</span><br><span class="line"></span><br><span class="line">kv.encode(<span class="string">"string"</span>, <span class="string">"Hello from mmkv"</span>);</span><br><span class="line">System.out.println(<span class="string">"string: "</span> + kv.decodeString(<span class="string">"string"</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">byte</span>[] bytes = &#123;<span class="string">'m'</span>, <span class="string">'m'</span>, <span class="string">'k'</span>, <span class="string">'v'</span>&#125;;</span><br><span class="line">kv.encode(<span class="string">"bytes"</span>, bytes);</span><br><span class="line">System.out.println(<span class="string">"bytes: "</span> + <span class="keyword">new</span> String(kv.decodeBytes(<span class="string">"bytes"</span>)));</span><br></pre></td></tr></table></figure>
@@ -368,7 +368,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/dev/archives/">
         
-          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
