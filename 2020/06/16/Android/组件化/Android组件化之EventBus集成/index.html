@@ -27,11 +27,13 @@
 <meta property="og:site_name" content="3927学习吧">
 <meta property="og:description" content="组件化项目数据的通信机制，使用操作方便的EventBus">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://3927.group/dev/2020/06/16/Android/%E7%BB%84%E4%BB%B6%E5%8C%96/Android%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BEventBus%E9%9B%86%E6%88%90/1.png">
 <meta property="article:published_time" content="2020-06-16T10:06:24.000Z">
-<meta property="article:modified_time" content="2020-06-16T10:28:34.286Z">
+<meta property="article:modified_time" content="2020-06-16T10:31:01.266Z">
 <meta property="article:author" content="Jackzhou">
 <meta property="article:tag" content="组件化">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://3927.group/dev/2020/06/16/Android/%E7%BB%84%E4%BB%B6%E5%8C%96/Android%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BEventBus%E9%9B%86%E6%88%90/1.png">
 
 <link rel="canonical" href="http://3927.group/dev/2020/06/16/Android/%E7%BB%84%E4%BB%B6%E5%8C%96/Android%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BEventBus%E9%9B%86%E6%88%90/">
 
@@ -191,7 +193,7 @@
               </span>
               
 
-              <time title="创建时间：2020-06-16 18:06:24 / 修改时间：18:28:34" itemprop="dateCreated datePublished" datetime="2020-06-16T18:06:24+08:00">2020-06-16</time>
+              <time title="创建时间：2020-06-16 18:06:24 / 修改时间：18:31:01" itemprop="dateCreated datePublished" datetime="2020-06-16T18:06:24+08:00">2020-06-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -214,9 +216,9 @@
 
       
         <p>组件化项目数据的通信机制，使用操作方便的EventBus<br><a id="more"></a></p>
-<h2 id="GreenDao-介绍"><a href="#GreenDao-介绍" class="headerlink" title="GreenDao 介绍"></a>GreenDao 介绍</h2><p><a href="https://github.com/greenrobot/EventBus" target="_blank" rel="noopener">EventBus Github 地址</a></p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>EventBus…</p>
-<ul>
+<h2 id="EventBus-介绍"><a href="#EventBus-介绍" class="headerlink" title="EventBus 介绍"></a>EventBus 介绍</h2><p><a href="https://github.com/greenrobot/EventBus" target="_blank" rel="noopener">EventBus Github 地址</a></p>
+<img src="/dev/2020/06/16/Android/%E7%BB%84%E4%BB%B6%E5%8C%96/Android%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BEventBus%E9%9B%86%E6%88%90/1.png" class="" title="图1">
+<h3 id="EventBus优点"><a href="#EventBus优点" class="headerlink" title="EventBus优点"></a>EventBus优点</h3><ul>
 <li>简化组件之间的通信</li>
 <li>decouples event senders and receivers</li>
 <li>对activity、fragment和background threads执行良好</li>
@@ -344,7 +346,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GreenDao-介绍"><span class="nav-number">1.</span> <span class="nav-text">GreenDao 介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集成"><span class="nav-number">3.</span> <span class="nav-text">集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义声明Event"><span class="nav-number">3.1.</span> <span class="nav-text">定义声明Event</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Prepare-subscribers"><span class="nav-number">3.2.</span> <span class="nav-text">Prepare subscribers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Post-events"><span class="nav-number">3.3.</span> <span class="nav-text">Post events</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">4.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#建立单独的module管理消息"><span class="nav-number">4.1.</span> <span class="nav-text">建立单独的module管理消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#gradle配置"><span class="nav-number">4.1.1.</span> <span class="nav-text">gradle配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#混淆的处理"><span class="nav-number">4.1.2.</span> <span class="nav-text">混淆的处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#以登录状态的Event-为例"><span class="nav-number">4.2.</span> <span class="nav-text">以登录状态的Event 为例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基类Event"><span class="nav-number">4.2.1.</span> <span class="nav-text">基类Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#登录状态Event"><span class="nav-number">4.2.2.</span> <span class="nav-text">登录状态Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#订阅Event消息"><span class="nav-number">4.2.3.</span> <span class="nav-text">订阅Event消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#发送Event消息"><span class="nav-number">4.2.4.</span> <span class="nav-text">发送Event消息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Event-工具类的封装"><span class="nav-number">4.3.</span> <span class="nav-text">Event 工具类的封装</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#EventBus-介绍"><span class="nav-number">1.</span> <span class="nav-text">EventBus 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#EventBus优点"><span class="nav-number">1.1.</span> <span class="nav-text">EventBus优点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集成"><span class="nav-number">2.</span> <span class="nav-text">集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义声明Event"><span class="nav-number">2.1.</span> <span class="nav-text">定义声明Event</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Prepare-subscribers"><span class="nav-number">2.2.</span> <span class="nav-text">Prepare subscribers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Post-events"><span class="nav-number">2.3.</span> <span class="nav-text">Post events</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">3.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#建立单独的module管理消息"><span class="nav-number">3.1.</span> <span class="nav-text">建立单独的module管理消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#gradle配置"><span class="nav-number">3.1.1.</span> <span class="nav-text">gradle配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#混淆的处理"><span class="nav-number">3.1.2.</span> <span class="nav-text">混淆的处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#以登录状态的Event-为例"><span class="nav-number">3.2.</span> <span class="nav-text">以登录状态的Event 为例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基类Event"><span class="nav-number">3.2.1.</span> <span class="nav-text">基类Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#登录状态Event"><span class="nav-number">3.2.2.</span> <span class="nav-text">登录状态Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#订阅Event消息"><span class="nav-number">3.2.3.</span> <span class="nav-text">订阅Event消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#发送Event消息"><span class="nav-number">3.2.4.</span> <span class="nav-text">发送Event消息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Event-工具类的封装"><span class="nav-number">3.3.</span> <span class="nav-text">Event 工具类的封装</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
