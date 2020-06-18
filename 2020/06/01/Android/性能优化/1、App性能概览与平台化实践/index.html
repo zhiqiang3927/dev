@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简要谈谈面试的套路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="App性能概览与平台化实践">
+<meta property="og:url" content="http://3927.group/dev/2020/06/01/Android/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1%E3%80%81App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="简要谈谈面试的套路">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-31T17:37:27.000Z">
+<meta property="article:modified_time" content="2020-06-18T11:41:56.698Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="性能优化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://3927.group/dev/2020/06/01/Android/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1%E3%80%81App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>App性能概览与平台化实践 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">72</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">94</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2020/06/01/Android/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1%E3%80%81App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          App性能概览与平台化实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+
+              <time title="创建时间：2020-06-01 01:37:27" itemprop="dateCreated datePublished" datetime="2020-06-01T01:37:27+08:00">2020-06-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/App%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">App性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>简要谈谈面试的套路<br><a id="more"></a></p>
+<h2 id="性能优化的问题"><a href="#性能优化的问题" class="headerlink" title="性能优化的问题"></a>性能优化的问题</h2><h3 id="性能表现差"><a href="#性能表现差" class="headerlink" title="性能表现差"></a>性能表现差</h3><ul>
+<li>卡顿、启动慢、丢帧</li>
+<li>内存占用高、抖动频繁</li>
+<li>耗电、网络请求慢</li>
+<li>崩溃率、异常率高</li>
+</ul>
+<h3 id="线上问题无从追查"><a href="#线上问题无从追查" class="headerlink" title="线上问题无从追查"></a>线上问题无从追查</h3><ul>
+<li>如何保证异常感知灵敏度</li>
+<li>如何复原案发现场</li>
+<li>如何快速止血成功</li>
+</ul>
+<h3 id="性能优化的长期开销大"><a href="#性能优化的长期开销大" class="headerlink" title="性能优化的长期开销大"></a>性能优化的长期开销大</h3><ul>
+<li>如何扼杀问题于萌芽，立足高角度工作，主动帮leader解决技术问题</li>
+<li>性能优化效果如何长期保持</li>
+</ul>
+<h2 id="性能优化不同阶段"><a href="#性能优化不同阶段" class="headerlink" title="性能优化不同阶段"></a>性能优化不同阶段</h2><h3 id="项目初期"><a href="#项目初期" class="headerlink" title="项目初期"></a>项目初期</h3><ul>
+<li>只关心崩溃率、不采集性能数据</li>
+<li>没有性能检测、优化方案</li>
+<li>没有排查问题手段</li>
+</ul>
+<h3 id="项目壮大期"><a href="#项目壮大期" class="headerlink" title="项目壮大期"></a>项目壮大期</h3><ul>
+<li>指标采集、不够全及深入</li>
+<li>接入成熟APM，排查手段单一</li>
+<li>线下检测、优化，方案不成型</li>
+</ul>
+<h3 id="项目成熟期"><a href="#项目成熟期" class="headerlink" title="项目成熟期"></a>项目成熟期</h3><ul>
+<li>重点关注性能问题，数据丰富，手段多样化</li>
+<li>线上、线下一整套完善的解决方案（重点）</li>
+<li>自建APM，新产品可以快速接入</li>
+</ul>
+<h3 id="线上线下解决方案原因"><a href="#线上线下解决方案原因" class="headerlink" title="线上线下解决方案原因"></a>线上线下解决方案原因</h3><ul>
+<li>误区：对线上不重视</li>
+<li>侧重点：线下预防、线上监控</li>
+<li>方案不同：线下可用黑科技</li>
+</ul>
+<h3 id="为什么自建APM"><a href="#为什么自建APM" class="headerlink" title="为什么自建APM"></a>为什么自建APM</h3><ul>
+<li>成熟APM通用，但不满足个性化需求（启动各个阶段指标）</li>
+<li>外部APM与内部系统难打通，带来的时间成本</li>
+<li>数据必须掌握在自己手中</li>
+</ul>
+<p>性能优化的方案一直进步</p>
+<h2 id="业界优秀的平台化实践"><a href="#业界优秀的平台化实践" class="headerlink" title="业界优秀的平台化实践"></a>业界优秀的平台化实践</h2><h3 id="Crash收集平台"><a href="#Crash收集平台" class="headerlink" title="Crash收集平台"></a>Crash收集平台</h3><h4 id="bugly为代表"><a href="#bugly为代表" class="headerlink" title="bugly为代表"></a>bugly为代表</h4><p><a href="https://bugly.qq.com/v2/index" target="_blank" rel="noopener">bugly 官网</a></p>
+<ul>
+<li>数据采集、上报成功率高</li>
+<li>包含Java、Native崩溃</li>
+<li>建议项目初期接入</li>
+</ul>
+<h3 id="APM平台"><a href="#APM平台" class="headerlink" title="APM平台"></a>APM平台</h3><h4 id="听云"><a href="#听云" class="headerlink" title="听云"></a>听云</h4><p><a href="https://www.tingyun.com/" target="_blank" rel="noopener">听云-国内专业的应用性能监控平台</a></p>
+<ul>
+<li>通用的性能解决方案，数据采集完善</li>
+<li>方便接入，但不满足个性化需求，数据隐患</li>
+<li>建议性能方案不完善的阶段接入</li>
+</ul>
+<h3 id="自建解决方案"><a href="#自建解决方案" class="headerlink" title="自建解决方案"></a>自建解决方案</h3><h4 id="美团、携程、360等"><a href="#美团、携程、360等" class="headerlink" title="美团、携程、360等"></a>美团、携程、360等</h4><p><a href="https://tech.meituan.com/2018/11/01/cat-in-depth-java-application-monitoring.html" target="_blank" rel="noopener">美团-CAT（Central Application Tracking）是一个实时和接近全量的监控系统，它侧重于对Java应用的监控，基本接入了美团上海侧所有核心应用。目前在中间件（MVC、RPC、数据库、缓存等）框架中得到广泛应用，为美团各业务线提供系统的性能指标、健康状况、监控告警等</a></p>
+<p><a href="https://blog.csdn.net/m0_37411791/article/details/103296270" target="_blank" rel="noopener">携程-携程无线APM升级实践（文章）</a></p>
+<p><a href="https://github.com/Qihoo360/ArgusAPM" target="_blank" rel="noopener">360-ArgusAPM是360手机卫士客户端团队继RePlugin之后开源的又一个重量级开源项目。ArgusAPM是360移动端产品使用的可视化性能监控平台，为移动端APP提供性能监控与管理，可以迅速发现和定位各类APP性能和使用问题，帮助APP不断的提升用户体验</a></p>
+<ul>
+<li>贴合自身业务特点，满足定制化需求</li>
+<li>数据安全</li>
+</ul>
+<h2 id="性能解决方案与平台化实践模拟面试"><a href="#性能解决方案与平台化实践模拟面试" class="headerlink" title="性能解决方案与平台化实践模拟面试"></a>性能解决方案与平台化实践模拟面试</h2><h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>面试不仅仅是技术点的考察</li>
+<li>职业生涯上台阶不能只埋头做技术（大局观、沟通技巧、语言表达、总结能力、深度思考能力、逻辑性和条理性）</li>
+</ul>
+<h3 id="答题套路"><a href="#答题套路" class="headerlink" title="答题套路"></a>答题套路</h3><ul>
+<li>找答案：立足项目整个周期</li>
+<li>讲案例：找普通痛点（共性）</li>
+<li>超预期：体现你和别人的区别</li>
+</ul>
+<h3 id="具体问题"><a href="#具体问题" class="headerlink" title="具体问题"></a>具体问题</h3><h4 id="你们为什么要做性能优化"><a href="#你们为什么要做性能优化" class="headerlink" title="你们为什么要做性能优化"></a>你们为什么要做性能优化</h4><p>考察你的角色、你们队资源分配</p>
+<ul>
+<li>体验差影响核心指标（数据）</li>
+<li>线上问题追查困难</li>
+<li>降低性能优化的长期开销</li>
+</ul>
+<h4 id="介绍一下你们的性能平台"><a href="#介绍一下你们的性能平台" class="headerlink" title="介绍一下你们的性能平台"></a>介绍一下你们的性能平台</h4><ul>
+<li>交代背景（不同阶段不同处理）</li>
+<li>具体讲解（不同阶段）</li>
+</ul>
+<h4 id="你们为什么要自建APM"><a href="#你们为什么要自建APM" class="headerlink" title="你们为什么要自建APM"></a>你们为什么要自建APM</h4><ul>
+<li>需求层面（不满足的例子，启动阶段）</li>
+<li>效率层面（商业结合不好）</li>
+<li>数据安全（核心运营数据）</li>
+<li>接入孵化项目</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i> 性能优化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2020/05/27/GitLab/%E5%88%86%E4%BA%AB%E9%A1%B9%E7%9B%AE%E5%88%B0GitLab%E6%8E%A7%E5%88%B6/" rel="prev" title="分享项目到GitLab控制">
+      <i class="fa fa-chevron-left"></i> 分享项目到GitLab控制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/dev/2020/06/01/interView/%E6%8A%80%E6%9C%AF%E9%9D%A2%E8%AF%95%E7%AE%80%E5%8E%86%E7%BC%96%E5%86%99/" rel="next" title="技术面试简历编写">
+      技术面试简历编写 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#性能优化的问题"><span class="nav-number">1.</span> <span class="nav-text">性能优化的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#性能表现差"><span class="nav-number">1.1.</span> <span class="nav-text">性能表现差</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线上问题无从追查"><span class="nav-number">1.2.</span> <span class="nav-text">线上问题无从追查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#性能优化的长期开销大"><span class="nav-number">1.3.</span> <span class="nav-text">性能优化的长期开销大</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能优化不同阶段"><span class="nav-number">2.</span> <span class="nav-text">性能优化不同阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#项目初期"><span class="nav-number">2.1.</span> <span class="nav-text">项目初期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#项目壮大期"><span class="nav-number">2.2.</span> <span class="nav-text">项目壮大期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#项目成熟期"><span class="nav-number">2.3.</span> <span class="nav-text">项目成熟期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线上线下解决方案原因"><span class="nav-number">2.4.</span> <span class="nav-text">线上线下解决方案原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么自建APM"><span class="nav-number">2.5.</span> <span class="nav-text">为什么自建APM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业界优秀的平台化实践"><span class="nav-number">3.</span> <span class="nav-text">业界优秀的平台化实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Crash收集平台"><span class="nav-number">3.1.</span> <span class="nav-text">Crash收集平台</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bugly为代表"><span class="nav-number">3.1.1.</span> <span class="nav-text">bugly为代表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APM平台"><span class="nav-number">3.2.</span> <span class="nav-text">APM平台</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#听云"><span class="nav-number">3.2.1.</span> <span class="nav-text">听云</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自建解决方案"><span class="nav-number">3.3.</span> <span class="nav-text">自建解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#美团、携程、360等"><span class="nav-number">3.3.1.</span> <span class="nav-text">美团、携程、360等</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能解决方案与平台化实践模拟面试"><span class="nav-number">4.</span> <span class="nav-text">性能解决方案与平台化实践模拟面试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项"><span class="nav-number">4.1.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#答题套路"><span class="nav-number">4.2.</span> <span class="nav-text">答题套路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体问题"><span class="nav-number">4.3.</span> <span class="nav-text">具体问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#你们为什么要做性能优化"><span class="nav-number">4.3.1.</span> <span class="nav-text">你们为什么要做性能优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#介绍一下你们的性能平台"><span class="nav-number">4.3.2.</span> <span class="nav-text">介绍一下你们的性能平台</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#你们为什么要自建APM"><span class="nav-number">4.3.3.</span> <span class="nav-text">你们为什么要自建APM</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
