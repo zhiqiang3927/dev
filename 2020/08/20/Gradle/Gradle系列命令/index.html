@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dev/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dev/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dev/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/dev/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/dev/css/main.css">
+
+
+<link rel="stylesheet" href="/dev/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"3927.group","root":"/dev/","scheme":"Pisces","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#f00","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Gradle 常用命令集锦">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gradle 系列命令">
+<meta property="og:url" content="http://3927.group/dev/2020/08/20/Gradle/Gradle%E7%B3%BB%E5%88%97%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="3927学习吧">
+<meta property="og:description" content="Gradle 常用命令集锦">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-20T10:58:34.000Z">
+<meta property="article:modified_time" content="2020-08-20T11:15:45.670Z">
+<meta property="article:author" content="Jackzhou">
+<meta property="article:tag" content="Gradle">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://3927.group/dev/2020/08/20/Gradle/Gradle%E7%B3%BB%E5%88%97%E5%91%BD%E4%BB%A4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Gradle 系列命令 | 3927学习吧</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/dev/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">3927学习吧</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Good Good Study,Day Day Up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/dev/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/dev/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/dev/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">79</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/dev/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/dev/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">106</span></a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/zhiqiang3927" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://3927.group/dev/2020/08/20/Gradle/Gradle%E7%B3%BB%E5%88%97%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/dev/images/logo.jpg">
+      <meta itemprop="name" content="Jackzhou">
+      <meta itemprop="description" content="每天成长一点点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="3927学习吧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Gradle 系列命令
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+
+              <time title="创建时间：2020-08-20 18:58:34 / 修改时间：19:15:45" itemprop="dateCreated datePublished" datetime="2020-08-20T18:58:34+08:00">2020-08-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/dev/categories/Gradle/" itemprop="url" rel="index"><span itemprop="name">Gradle</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Gradle 常用命令集锦<br><a id="more"></a></p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gradle [taskName...] [--option-name...]</span><br></pre></td></tr></table></figure>
+<p>gradlew 是包装器，自动下载包装里定义好的gradle 版本，保证编译环境统一，gradle 是用本地的gradle。所以./gradlew、gradle通用，不神秘，使用更方便一些,可以使用gradle互相替换。其中gradlew的内容可以在项目的目录下查看。</p>
+<h3 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h3><p>如果需要处理多任务，任务列表必须使用空格分割开，如</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gradle test deploy</span><br></pre></td></tr></table></figure>
+<h3 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h3><p>选项可以放在任务列表前也可以放在任务列表后，如下的写法作用是相同的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gradle --console=plain test</span><br><span class="line">gradle test --console=plain</span><br></pre></td></tr></table></figure>
+<p>记忆技巧：长格式的选项 表示启用特性的都具有反向操作（关闭特性），关闭特性长选项格式在启用特性前缀<code>no-</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">--build-cache</span><br><span class="line">--configure-on-demand</span><br><span class="line">--daemon</span><br><span class="line">--parallel</span><br><span class="line">--scan</span><br><span class="line"></span><br><span class="line">--no-build-cache</span><br><span class="line">--no-configure-on-demand</span><br><span class="line">--no-daemon</span><br><span class="line">--no-parallel</span><br><span class="line">--no-scan</span><br></pre></td></tr></table></figure>
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>command_Parameters</th>
+<th>introduction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-?, -h, —help</td>
+<td>展示帮助信息</td>
+</tr>
+<tr>
+<td>-a, —no-rebuild</td>
+<td>忽略构建”项目依赖”,[废弃]</td>
+</tr>
+<tr>
+<td>-b, —build-file</td>
+<td>使用用-b参数将会忽略setting文件,用指定的.gradle文件进行构建(默认情况下首先会寻找当前目录下的 build.gradle文件或依据settings.gradle中的配置寻找子项目中的build.gradle)</td>
+</tr>
+<tr>
+<td>—build-cache</td>
+<td>支持gradle缓存。Gradle将试图重用以前的版本的输出</td>
+</tr>
+<tr>
+<td>-c, —settings-file</td>
+<td>执行指定的*.gralde文件(默认settings.gradle)</td>
+</tr>
+<tr>
+<td>—configure-on-demand</td>
+<td>配置必要的项目。Gradle将试图减少大型多项目构建的配置时间</td>
+</tr>
+<tr>
+<td>—console</td>
+<td>指定控制台输出类型,可选值有’plain’、‘auto’(默认)、‘rich’、‘verbose’。plain 是生成普通的文本，该选项禁止所有颜色和富文本输出;auto当构建程序与控制台相关联时启动颜色和富文本输出，或者不关联时生成普通文本;rich 启动颜色和富文本输出，忽略构建程序是否关联了控制台,如果没有关联构建输出将输出 ANSI 控制字符来生产富文本输出;verbose会输出更多的详细信息(感觉很乱，调试问题可能会用到)</td>
+</tr>
+<tr>
+<td>—continue</td>
+<td>构建时遇到错误忽略报错,继续构建,默认报错后终止构建</td>
+</tr>
+<tr>
+<td>-D, —system-prop</td>
+<td>-D属性会被传送给启动Gradle的jvm，作为一个系统属性被jvm使用(例如:-Dmyprop=myvalue)</td>
+</tr>
+<tr>
+<td>-d, —debug</td>
+<td>指定日志输出级别为debug,可打印一般堆栈信息</td>
+</tr>
+<tr>
+<td>—daemon</td>
+<td>使用Gradle守护进程执行构建,如果没有守护进程则启动一个守护进程</td>
+</tr>
+<tr>
+<td>—foreground</td>
+<td>以foreground形式启动守护进程</td>
+</tr>
+<tr>
+<td>-g, —gradle-user-home</td>
+<td>指定默认的指定Gradle 用户home目录.默认在”用户目录/.gradle”</td>
+</tr>
+<tr>
+<td>-I, —init-script</td>
+<td>运行指定初始化脚本,脚本会在build之前执行.查找init.gradle的路径顺序：./,USER_HOME/.gradle/ ,USER_HOME/.gradle/init.d/,GRADLE_HOME/init.d/</td>
+</tr>
+<tr>
+<td>-i, —info</td>
+<td>指定日志级别为info</td>
+</tr>
+<tr>
+<td>—include-build</td>
+<td>在组合中包含指定的构建</td>
+</tr>
+<tr>
+<td>-m, —dry-run</td>
+<td>模拟任务执行过程并将过程打印出来,并非真正执行,目的是展示执行的过程</td>
+</tr>
+<tr>
+<td>—max-workers</td>
+<td>设定参与构建的cpu的核数</td>
+</tr>
+<tr>
+<td>—no-build-cache</td>
+<td>禁用构建缓存</td>
+</tr>
+<tr>
+<td>—no-configure-on-demand</td>
+<td>根据需要禁用配置</td>
+</tr>
+<tr>
+<td>—no-daemon</td>
+<td>禁用守护进程,不使用守护进程执行构建. 如果你已经配置了Gradle总会使用守护进程运行，此选项有帮助</td>
+</tr>
+<tr>
+<td>—no-parallel</td>
+<td>禁止使用并行模式构建项目</td>
+</tr>
+<tr>
+<td>—no-scan</td>
+<td>禁用创建构建扫描,更多信息可以参考<a href="https://gradle.com/build-scans" target="_blank" rel="noopener">https://gradle.com/build-scans</a></td>
+</tr>
+<tr>
+<td>—offline</td>
+<td>采用离线模式构建项目,不使用网路资源(此时很有可能出现构建失败的情况慎用)</td>
+</tr>
+<tr>
+<td>-P, —project-prop</td>
+<td>设置Gradle的项目参数,会被直接加载到Gradle领域对象上(例如:-Pmyprop=myvalue)</td>
+</tr>
+<tr>
+<td>-p, —project-dir</td>
+<td>为gradle指定起始目录。默认为当前目录</td>
+</tr>
+<tr>
+<td>—parallel</td>
+<td>采用并行模式构建。gradle采用配置的线程数进行构建</td>
+</tr>
+<tr>
+<td>—profile</td>
+<td>存储一份执行报告到<build_dir>/reports/profile,包括总时间和在配置和任务执行阶段的细节。并以时间大小倒序排列，并且记录了任务的执行情况.Gradle会根据构建时间命名这些报告文件</td>
+</tr>
+<tr>
+<td>—project-cache-dir</td>
+<td>指定项目的缓存目录。默认在项目目录中。</td>
+</tr>
+<tr>
+<td>-q, —quiet</td>
+<td>静默方式，只输出error信息</td>
+</tr>
+<tr>
+<td>—recompile-scripts</td>
+<td>强制构建脚本重新编译[废弃]</td>
+</tr>
+<tr>
+<td>—refresh-dependencies</td>
+<td>刷新依赖的状态</td>
+</tr>
+<tr>
+<td>—rerun-tasks</td>
+<td>忽略先前缓存的任务结果</td>
+</tr>
+<tr>
+<td>-S, —full-stacktrace</td>
+<td>打印全部详细信息，所有异常的堆栈信息</td>
+</tr>
+<tr>
+<td>-s, —stacktrace</td>
+<td>打印所有异常的堆栈信息</td>
+</tr>
+<tr>
+<td>—scan</td>
+<td>创建一个构建扫描。如果构建扫描插件没有被应用，那么gradle会发出警告<a href="https://gradle.com/build-scans" target="_blank" rel="noopener">https://gradle.com/build-scans</a></td>
+</tr>
+<tr>
+<td>—status</td>
+<td>统计信息，展示正在运行和最近停止的gradle进程</td>
+</tr>
+<tr>
+<td>—stop</td>
+<td>如果守护进程正在运行，停止gradle的守护进程</td>
+</tr>
+<tr>
+<td>-t, —continuous</td>
+<td>连续构建模式,采用此模式后会监听所有构建文件变化,文件发生变化后会自动重新构建</td>
+</tr>
+<tr>
+<td>-u, —no-search-upward</td>
+<td>不使用父目录中的settings.gradle文件,如果不添加此项,父目录的setting.gradle会覆盖子目录下的配置</td>
+</tr>
+<tr>
+<td>-v, —version</td>
+<td>打印gradle版本信息</td>
+</tr>
+<tr>
+<td>-w, —warn</td>
+<td>指定日志级别为warn</td>
+</tr>
+<tr>
+<td>—warning-mode</td>
+<td>指定要生成的警告模式。值是’all’, ‘summary’(默认) or ‘no’</td>
+</tr>
+<tr>
+<td>-x, —exclude-task</td>
+<td>任务排除,跳过执行指定任务</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="gradle-命令"><a href="#gradle-命令" class="headerlink" title="gradle 命令"></a>gradle 命令</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gradle dependencies</td>
+<td>打印所有依赖树</td>
+</tr>
+<tr>
+<td>gradle projects</td>
+<td>打印目前的项目构成</td>
+</tr>
+<tr>
+<td>gradle tasks</td>
+<td>当前项目的所有任务</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="gradlew-命令"><a href="#gradlew-命令" class="headerlink" title="gradlew 命令"></a>gradlew 命令</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>./gradlew 模块名:dependencies</td>
+<td>打印模块下的依赖树</td>
+</tr>
+<tr>
+<td>gradlew cleanBuildCache</td>
+<td>删除缓存。Gradle 缓存默认位于以下位置（若自己指定过位置，位置是指定位置的caches文件夹），可用命令删除，也可手动删除。在Windows上：%USER_HOME%.gradle/caches/；在Mac / Unix上：$HOME/.gradle/caches/</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>小礼物刷一波！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/alipay_qiang.jpeg" alt="Jackzhou 支付宝">
+        <p>支付宝</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/dev/images/wechat_qiang.jpeg" alt="Jackzhou 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/dev/tags/Gradle/" rel="tag"><i class="fa fa-tag"></i> Gradle</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/dev/2020/08/12/Server/zookeeper/MAC%E4%B8%8BZookeeper%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/" rel="prev" title="MAC下Zookeeper的安装和配置">
+      <i class="fa fa-chevron-left"></i> MAC下Zookeeper的安装和配置
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#语法"><span class="nav-number">1.</span> <span class="nav-text">语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#任务"><span class="nav-number">1.1.</span> <span class="nav-text">任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选项"><span class="nav-number">1.2.</span> <span class="nav-text">选项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数"><span class="nav-number">2.</span> <span class="nav-text">参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gradle-命令"><span class="nav-number">3.</span> <span class="nav-text">gradle 命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gradlew-命令"><span class="nav-number">4.</span> <span class="nav-text">gradlew 命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jackzhou"
+      src="/dev/images/logo.jpg">
+  <p class="site-author-name" itemprop="name">Jackzhou</p>
+  <div class="site-description" itemprop="description">每天成长一点点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/dev/archives/">
+        
+          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/dev/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/dev/tags/">
+          
+        <span class="site-state-item-count">79</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhiqiang3927" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhiqiang3927" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhiqiang2008.happy@163.com" title="E-Mail → mailto:zhiqiang2008.happy@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jackzhou</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/dev/lib/anime.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.min.js"></script>
+  <script src="/dev/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/dev/js/utils.js"></script>
+
+<script src="/dev/js/motion.js"></script>
+
+
+<script src="/dev/js/schemes/pisces.js"></script>
+
+
+<script src="/dev/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
